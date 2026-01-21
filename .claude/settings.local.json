@@ -10,7 +10,9 @@
       "Bash(uv run pytest:*)",
       "Bash(findstr /v \".venv\")",
       "Bash(find:*)",
-      "Bash(.venv/Scripts/python:*)"
+      "Bash(.venv/Scripts/python:*)",
+      "mcp__web-search-prime__webSearchPrime",
+      "mcp__web-reader__webReader"
     ],
     "deny": [],
     "ask": []
