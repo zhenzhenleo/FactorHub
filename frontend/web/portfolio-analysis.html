@@ -214,72 +214,85 @@
 
             <!-- 综合得分 -->
             <div id="content-composite" class="tab-content hidden">
-                <div class="card">
-                    <h2 class="text-lg font-bold text-slate-800 mb-4">因子综合得分</h2>
-                    <p class="text-slate-600 mb-6">计算多个因子的综合得分，用于股票排序和选股。</p>
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                    <!-- 配置面板 -->
+                    <div class="card">
+                        <h2 class="text-lg font-bold text-slate-800 mb-4">综合得分配置</h2>
+                        <p class="text-slate-600 mb-6 text-sm">计算多个因子的综合得分，用于股票排序和选股。</p>
 
-                    <form id="composite-form" onsubmit="runCompositeScore(event)" class="mb-6">
-                        <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
-                            <div>
+                        <form id="composite-form" onsubmit="runCompositeScore(event)">
+                            <div class="mb-4">
                                 <label class="block text-sm text-slate-600 mb-2">股票代码</label>
                                 <input type="text" name="stock_code" class="input" value="000001" placeholder="例如：000001" required>
                             </div>
-                            <div>
-                                <label class="block text-sm text-slate-600 mb-2">开始日期</label>
-                                <input type="date" name="start_date" id="composite-start-date" class="input" required>
-                            </div>
-                            <div>
-                                <label class="block text-sm text-slate-600 mb-2">结束日期</label>
-                                <input type="date" name="end_date" id="composite-end-date" class="input" required>
-                            </div>
-                            <div class="flex items-end">
-                                <button type="submit" class="btn btn-primary w-full cursor-pointer transition-all duration-200">
-                                    计算得分
-                                </button>
-                            </div>
-                        </div>
 
-                        <div class="mt-4">
-                            <label class="block text-sm text-slate-600 mb-2">选择因子（多选）</label>
-                            <div id="composite-factors-checkboxes" class="flex flex-wrap gap-2">
-                                <p class="text-slate-600 text-sm">加载中...</p>
-                            </div>
-                        </div>
-                    </form>
-
-                    <!-- 综合得分结果 -->
-                    <div id="composite-placeholder" class="text-center py-12">
-                        <p class="text-slate-600">选择因子后点击"计算得分"</p>
-                    </div>
-
-                    <div id="composite-result" class="hidden">
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                            <div>
-                                <h3 class="font-semibold text-slate-800 mb-3">综合得分序列</h3>
-                                <div class="bg-slate-50 rounded-lg p-4">
-                                    <div class="chart-container-small">
-                                        <canvas id="composite-score-chart"></canvas>
-                                    </div>
+                            <div class="grid grid-cols-2 gap-4 mb-4">
+                                <div>
+                                    <label class="block text-sm text-slate-600 mb-2">开始日期</label>
+                                    <input type="date" name="start_date" id="composite-start-date" class="input" required>
+                                </div>
+                                <div>
+                                    <label class="block text-sm text-slate-600 mb-2">结束日期</label>
+                                    <input type="date" name="end_date" id="composite-end-date" class="input" required>
                                 </div>
                             </div>
-                            <div>
-                                <h3 class="font-semibold text-slate-800 mb-3">得分统计</h3>
-                                <div class="grid grid-cols-2 gap-3">
-                                    <div class="bg-primary-50 rounded-lg p-3">
-                                        <p class="text-xs text-slate-600">均值</p>
-                                        <p class="text-lg font-bold text-primary-600" id="composite-mean">-</p>
+
+                            <hr class="my-4">
+
+                            <div class="mb-4">
+                                <label class="block text-sm text-slate-600 mb-2">选择因子（多选）</label>
+                                <div id="composite-factors-checkboxes" class="space-y-2 max-h-48 overflow-y-auto">
+                                    <p class="text-slate-600 text-sm">加载中...</p>
+                                </div>
+                            </div>
+
+                            <button type="submit" class="btn btn-primary w-full cursor-pointer transition-all duration-200">
+                                计算得分
+                            </button>
+                        </form>
+                    </div>
+
+                    <!-- 结果展示 -->
+                    <div class="lg:col-span-2">
+                        <div class="card">
+                            <h2 class="text-lg font-bold text-slate-800 mb-4">综合得分结果</h2>
+
+                            <!-- 等待提示 -->
+                            <div id="composite-placeholder" class="text-center py-12">
+                                <p class="text-slate-600">选择因子后点击"计算得分"</p>
+                            </div>
+
+                            <!-- 结果内容 -->
+                            <div id="composite-result" class="hidden">
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                    <div>
+                                        <h3 class="font-semibold text-slate-800 mb-3">综合得分序列</h3>
+                                        <div class="bg-slate-50 rounded-lg p-4">
+                                            <div class="chart-container-small">
+                                                <canvas id="composite-score-chart"></canvas>
+                                            </div>
+                                        </div>
                                     </div>
-                                    <div class="bg-primary-50 rounded-lg p-3">
-                                        <p class="text-xs text-slate-600">标准差</p>
-                                        <p class="text-lg font-bold text-primary-600" id="composite-std">-</p>
-                                    </div>
-                                    <div class="bg-primary-50 rounded-lg p-3">
-                                        <p class="text-xs text-slate-600">最小值</p>
-                                        <p class="text-lg font-bold text-slate-800" id="composite-min">-</p>
-                                    </div>
-                                    <div class="bg-primary-50 rounded-lg p-3">
-                                        <p class="text-xs text-slate-600">最大值</p>
-                                        <p class="text-lg font-bold text-slate-800" id="composite-max">-</p>
+                                    <div>
+                                        <h3 class="font-semibold text-slate-800 mb-3">得分统计</h3>
+                                        <div class="grid grid-cols-2 gap-3">
+                                            <div class="bg-primary-50 rounded-lg p-3">
+                                                <p class="text-xs text-slate-600">均值</p>
+                                                <p class="text-lg font-bold text-primary-600" id="composite-mean">-</p>
+                                            </div>
+                                            <div class="bg-primary-50 rounded-lg p-3">
+                                                <p class="text-xs text-slate-600">标准差</p>
+                                                <p class="text-lg font-bold text-primary-600" id="composite-std">-</p>
+                                            </div>
+                                            <div class="bg-primary-50 rounded-lg p-3">
+                                                <p class="text-xs text-slate-600">最小值</p>
+                                                <p class="text-lg font-bold text-slate-800" id="composite-min">-</p>
+                                            </div>
+                                            <div class="bg-primary-50 rounded-lg p-3">
+                                                <p class="text-xs text-slate-600">最大值</p>
+                                                <p class="text-lg font-bold text-slate-800" id="composite-max">-</p>
+                                            </div>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
@@ -290,85 +303,100 @@
 
             <!-- 方法对比 -->
             <div id="content-compare" class="tab-content hidden">
-                <div class="card">
-                    <h2 class="text-lg font-bold text-slate-800 mb-4">权重方法对比</h2>
-                    <p class="text-slate-600 mb-6">对比不同权重分配方法的效果。</p>
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                    <!-- 配置面板 -->
+                    <div class="card">
+                        <h2 class="text-lg font-bold text-slate-800 mb-4">方法对比配置</h2>
+                        <p class="text-slate-600 mb-6 text-sm">对比不同权重分配方法的效果。</p>
 
-                    <form id="compare-form" onsubmit="runMethodCompare(event)" class="mb-6">
-                        <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
-                            <div>
+                        <form id="compare-form" onsubmit="runMethodCompare(event)">
+                            <div class="mb-4">
                                 <label class="block text-sm text-slate-600 mb-2">股票代码</label>
                                 <input type="text" name="stock_code" class="input" value="000001" placeholder="例如：000001" required>
                             </div>
-                            <div>
-                                <label class="block text-sm text-slate-600 mb-2">开始日期</label>
-                                <input type="date" name="start_date" id="compare-start-date" class="input" required>
-                            </div>
-                            <div>
-                                <label class="block text-sm text-slate-600 mb-2">结束日期</label>
-                                <input type="date" name="end_date" id="compare-end-date" class="input" required>
-                            </div>
-                            <div class="flex items-end">
-                                <button type="submit" class="btn btn-primary w-full cursor-pointer transition-all duration-200">
-                                    对比方法
-                                </button>
-                            </div>
-                        </div>
 
-                        <div class="mt-4">
-                            <label class="block text-sm text-slate-600 mb-2">选择因子（多选）</label>
-                            <div id="compare-factors-checkboxes" class="flex flex-wrap gap-2">
-                                <p class="text-slate-600 text-sm">加载中...</p>
+                            <div class="grid grid-cols-2 gap-4 mb-4">
+                                <div>
+                                    <label class="block text-sm text-slate-600 mb-2">开始日期</label>
+                                    <input type="date" name="start_date" id="compare-start-date" class="input" required>
+                                </div>
+                                <div>
+                                    <label class="block text-sm text-slate-600 mb-2">结束日期</label>
+                                    <input type="date" name="end_date" id="compare-end-date" class="input" required>
+                                </div>
                             </div>
-                        </div>
 
-                        <div class="mt-4">
-                            <label class="block text-sm text-slate-600 mb-2">对比方法（多选）</label>
-                            <div class="flex flex-wrap gap-2">
-                                <label class="flex items-center gap-2 p-2 bg-slate-50 rounded cursor-pointer">
-                                    <input type="checkbox" name="methods" value="equal_weight" checked class="w-4 h-4">
-                                    <span class="text-sm">等权重</span>
-                                </label>
-                                <label class="flex items-center gap-2 p-2 bg-slate-50 rounded cursor-pointer">
-                                    <input type="checkbox" name="methods" value="ic_weight" checked class="w-4 h-4">
-                                    <span class="text-sm">IC加权</span>
-                                </label>
-                                <label class="flex items-center gap-2 p-2 bg-slate-50 rounded cursor-pointer">
-                                    <input type="checkbox" name="methods" value="ir_weight" class="w-4 h-4">
-                                    <span class="text-sm">IR加权</span>
-                                </label>
+                            <hr class="my-4">
+
+                            <div class="mb-4">
+                                <label class="block text-sm text-slate-600 mb-2">选择因子（多选）</label>
+                                <div id="compare-factors-checkboxes" class="space-y-2 max-h-48 overflow-y-auto">
+                                    <p class="text-slate-600 text-sm">加载中...</p>
+                                </div>
                             </div>
-                        </div>
-                    </form>
 
-                    <!-- 对比结果 -->
-                    <div id="compare-placeholder" class="text-center py-12">
-                        <div class="text-6xl mb-4">📈</div>
-                        <p class="text-slate-600">选择因子和方法后点击"对比方法"</p>
+                            <hr class="my-4">
+
+                            <div class="mb-4">
+                                <label class="block text-sm text-slate-600 mb-2">对比方法（多选）</label>
+                                <div class="space-y-2">
+                                    <label class="flex items-center gap-2 p-2 bg-slate-50 rounded cursor-pointer">
+                                        <input type="checkbox" name="methods" value="equal_weight" checked class="w-4 h-4">
+                                        <span class="text-sm">等权重</span>
+                                    </label>
+                                    <label class="flex items-center gap-2 p-2 bg-slate-50 rounded cursor-pointer">
+                                        <input type="checkbox" name="methods" value="ic_weight" checked class="w-4 h-4">
+                                        <span class="text-sm">IC加权</span>
+                                    </label>
+                                    <label class="flex items-center gap-2 p-2 bg-slate-50 rounded cursor-pointer">
+                                        <input type="checkbox" name="methods" value="ir_weight" class="w-4 h-4">
+                                        <span class="text-sm">IR加权</span>
+                                    </label>
+                                </div>
+                            </div>
+
+                            <button type="submit" class="btn btn-primary w-full cursor-pointer transition-all duration-200">
+                                对比方法
+                            </button>
+                        </form>
                     </div>
 
-                    <div id="compare-result" class="hidden">
-                        <div class="mb-6">
-                            <h3 class="font-semibold text-slate-800 mb-3">方法对比结果</h3>
-                            <div class="chart-container-small">
-                                <canvas id="compare-chart"></canvas>
-                            </div>
-                        </div>
+                    <!-- 结果展示 -->
+                    <div class="lg:col-span-2">
+                        <div class="card">
+                            <h2 class="text-lg font-bold text-slate-800 mb-4">方法对比结果</h2>
 
-                        <div class="overflow-x-auto">
-                            <table class="w-full">
-                                <thead>
-                                    <tr class="border-b border-slate-200">
-                                        <th class="py-3 px-4 text-left">方法</th>
-                                        <th class="py-3 px-4 text-right">年化收益</th>
-                                        <th class="py-3 px-4 text-right">波动率</th>
-                                        <th class="py-3 px-4 text-right">夏普比率</th>
-                                    </tr>
-                                </thead>
-                                <tbody id="compare-table">
-                                    <!-- 动态填充 -->
-                                </tbody>
-                            </table>
+                            <!-- 等待提示 -->
+                            <div id="compare-placeholder" class="text-center py-12">
+                                <div class="text-6xl mb-4">📈</div>
+                                <p class="text-slate-600">选择因子和方法后点击"对比方法"</p>
+                            </div>
+
+                            <!-- 结果内容 -->
+                            <div id="compare-result" class="hidden">
+                                <div class="mb-6">
+                                    <h3 class="font-semibold text-slate-800 mb-3">方法对比结果</h3>
+                                    <div class="chart-container-small">
+                                        <canvas id="compare-chart"></canvas>
+                                    </div>
+                                </div>
+
+                                <div class="overflow-x-auto">
+                                    <table class="w-full">
+                                        <thead>
+                                            <tr class="border-b border-slate-200">
+                                                <th class="py-3 px-4 text-left">方法</th>
+                                                <th class="py-3 px-4 text-right">年化收益</th>
+                                                <th class="py-3 px-4 text-right">波动率</th>
+                                                <th class="py-3 px-4 text-right">夏普比率</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="compare-table">
+                                            <!-- 动态填充 -->
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -569,7 +597,7 @@
                 if (result.success) {
                     const container = document.getElementById('composite-factors-checkboxes');
                     container.innerHTML = result.data.map(factor => `
-                        <label class="flex items-center gap-2 p-2 bg-slate-50 rounded cursor-pointer hover:bg-primary-50">
+                        <label class="flex items-center gap-2 p-2 hover:bg-primary-50 rounded cursor-pointer">
                             <input type="checkbox" name="factors" value="${factor.name}" class="w-4 h-4">
                             <span class="text-sm">${factor.name}</span>
                         </label>
@@ -587,7 +615,7 @@
                 if (result.success) {
                     const container = document.getElementById('compare-factors-checkboxes');
                     container.innerHTML = result.data.map(factor => `
-                        <label class="flex items-center gap-2 p-2 bg-slate-50 rounded cursor-pointer hover:bg-primary-50">
+                        <label class="flex items-center gap-2 p-2 hover:bg-primary-50 rounded cursor-pointer">
                             <input type="checkbox" name="factors" value="${factor.name}" class="w-4 h-4">
                             <span class="text-sm">${factor.name}</span>
                         </label>
