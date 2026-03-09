@@ -14,6 +14,9 @@
     <!-- Chart.js -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 
+    <!-- ECharts -->
+    <script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
+
     <!-- 自定义样式 -->
     <link rel="stylesheet" href="css/common.css">
 
@@ -154,6 +157,9 @@
                             </button>
                             <button onclick="switchTab('multi-period')" id="tab-multi-period" class="tab-btn py-4 px-2 border-b-2 border-transparent text-slate-600 hover:text-primary-600 font-medium whitespace-nowrap cursor-pointer transition-all duration-200">
                                 多周期分析
+                            </button>
+                            <button onclick="switchTab('chart')" id="tab-chart" class="tab-btn py-4 px-2 border-b-2 border-transparent text-slate-600 hover:text-primary-600 font-medium whitespace-nowrap cursor-pointer transition-all duration-200">
+                                行情图表
                             </button>
                         </nav>
                     </div>
@@ -299,6 +305,44 @@
                             </div>
                         </div>
                     </div>
+
+                    <!-- 行情图表 -->
+                    <div id="content-chart" class="tab-content hidden">
+                        <!-- 图表控制栏 -->
+                        <div class="card mb-4">
+                            <div class="flex items-center justify-between flex-wrap gap-4">
+                                <h3 class="font-semibold text-slate-800">行情与因子</h3>
+                                <div class="flex items-center gap-4 flex-wrap">
+                                    <!-- 日期范围选择 -->
+                                    <div class="flex items-center gap-2 whitespace-nowrap">
+                                        <label class="text-sm text-slate-600">时间范围</label>
+                                        <select id="chart-period" class="select" onchange="updateChartData()">
+                                            <option value="3m">近3个月</option>
+                                            <option value="6m">近6个月</option>
+                                            <option value="1y" selected>近1年</option>
+                                            <option value="2y">近2年</option>
+                                            <option value="all">全部</option>
+                                        </select>
+                                    </div>
+                                    <!-- 图表类型切换 -->
+                                    <div class="flex items-center gap-2 whitespace-nowrap">
+                                        <label class="text-sm text-slate-600">因子图表</label>
+                                        <select id="factor-chart-type" class="select" onchange="updateFactorChartType()">
+                                            <option value="line">折线图</option>
+                                            <option value="bar">柱状图</option>
+                                            <option value="area">面积图</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- K线图 + 因子图 -->
+                        <div class="card">
+                            <h3 class="font-semibold text-slate-800 mb-3">行情图表</h3>
+                            <div id="combined-chart" style="width: 100%; height: 650px;"></div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -438,6 +482,12 @@
 
             // 设置默认日期
             setDefaultDates();
+
+            // 如果当前是行情图表标签页，自动加载行情数据
+            const chartTab = document.getElementById('tab-chart');
+            if (chartTab && chartTab.classList.contains('tab-btn-active')) {
+                loadChartData();
+            }
         }
 
         // 更新因子详情
@@ -669,6 +719,11 @@
             document.getElementById(`content-${tabName}`).classList.remove('hidden');
             document.getElementById(`tab-${tabName}`).classList.remove('border-transparent', 'text-slate-600');
             document.getElementById(`tab-${tabName}`).classList.add('border-primary-500', 'text-primary-600');
+
+            // 如果切换到行情图表，加载数据
+            if (tabName === 'chart' && currentFactor) {
+                loadChartData();
+            }
         }
 
         // 运行分析
@@ -1170,6 +1225,407 @@
                     closeEditModal();
                 }
             });
+        });
+
+        // ========== 行情图表相关变量和函数 ==========
+        let chartData = null;
+        let combinedChart = null;
+        let currentChartPeriod = '1y';
+        let currentFactorChartType = 'line';
+
+        // 切换到行情图表标签时加载数据
+        async function loadChartData() {
+            if (!currentFactor) return;
+
+            const stockCode = document.getElementById('stock-code').value;
+            const endDate = new Date().toISOString().split('T')[0];
+            const startDate = getStartDateByPeriod(currentChartPeriod);
+
+            try {
+                showLoading('加载行情数据...');
+
+                // 获取股票数据
+                const stockResult = await api.getStockData(stockCode, startDate, endDate);
+
+                if (!stockResult || !stockResult.data) {
+                    showToast('未获取到股票数据', 'warning');
+                    hideLoading();
+                    return;
+                }
+
+                // 转换 DataFrame 格式为对象数组
+                const rawData = stockResult.data;
+                if (!rawData.data || rawData.data.length === 0) {
+                    showToast('股票数据为空', 'warning');
+                    hideLoading();
+                    return;
+                }
+
+                const stockData = rawData.data.map((row, i) => ({
+                    date: rawData.index[i],
+                    open: row[rawData.columns.indexOf('open')],
+                    high: row[rawData.columns.indexOf('high')],
+                    low: row[rawData.columns.indexOf('low')],
+                    close: row[rawData.columns.indexOf('close')],
+                    volume: row[rawData.columns.indexOf('volume')]
+                }));
+
+                // 计算因子值
+                const factorResult = await api.calculateFactor({
+                    stock_codes: [stockCode],
+                    factor_name: currentFactor.name,
+                    start_date: startDate,
+                    end_date: endDate
+                });
+
+                if (!factorResult || !factorResult.data || !factorResult.data[stockCode]) {
+                    showToast('未获取到因子数据', 'warning');
+                    hideLoading();
+                    return;
+                }
+
+                const factorData = factorResult.data[stockCode];
+                const factorValues = {
+                    dates: factorData.dates,
+                    values: factorData.factor_values
+                };
+
+                // 合并数据
+                chartData = {
+                    stock: stockData,
+                    factor: factorValues
+                };
+
+                // 绘制图表
+                drawCombinedChart();
+
+                hideLoading();
+            } catch (error) {
+                console.error('加载行情数据失败:', error);
+                showToast('加载失败', 'error');
+                hideLoading();
+            }
+        }
+
+        // 根据时间范围获取开始日期
+        function getStartDateByPeriod(period) {
+            const now = new Date();
+            let startDate;
+
+            switch (period) {
+                case '3m':
+                    startDate = new Date(now.setMonth(now.getMonth() - 3));
+                    break;
+                case '6m':
+                    startDate = new Date(now.setMonth(now.getMonth() - 6));
+                    break;
+                case '1y':
+                    startDate = new Date(now.setFullYear(now.getFullYear() - 1));
+                    break;
+                case '2y':
+                    startDate = new Date(now.setFullYear(now.getFullYear() - 2));
+                    break;
+                case 'all':
+                    startDate = new Date('2020-01-01');
+                    break;
+                default:
+                    startDate = new Date(now.setFullYear(now.getFullYear() - 1));
+            }
+
+            return startDate.toISOString().split('T')[0];
+        }
+
+        // 绘制组合图表（K线图 + 因子图，共用X轴）
+        function drawCombinedChart() {
+            const chartDom = document.getElementById('combined-chart');
+
+            if (combinedChart) {
+                combinedChart.dispose();
+            }
+
+            if (!chartData || !chartData.stock || !chartData.factor) return;
+
+            const stock = chartData.stock;
+            const factor = chartData.factor;
+
+            // 对齐股票和因子数据，使用相同日期
+            const stockDates = new Set(stock.map(s => s.date));
+            const alignedDates = factor.dates.filter(d => stockDates.has(d));
+
+            // 根据对齐后的日期过滤股票数据
+            const alignedStock = alignedDates.map(date => stock.find(s => s.date === date)).filter(Boolean);
+
+            // 根据对齐后的日期过滤因子数据
+            const factorDateMap = {};
+            factor.dates.forEach((d, i) => {
+                factorDateMap[d] = factor.values[i];
+            });
+            const alignedFactorValues = alignedDates.map(d => factorDateMap[d]);
+
+            // 采样数据（使用相同步长）
+            const maxPoints = 500;
+            let step = 1;
+            if (alignedDates.length > maxPoints) {
+                step = Math.ceil(alignedDates.length / maxPoints);
+            }
+
+            const displayDates = alignedDates.filter((_, i) => i % step === 0);
+            const displayStock = alignedStock.filter((_, i) => i % step === 0);
+            const displayFactorValues = alignedFactorValues.filter((_, i) => i % step === 0);
+
+            // 准备 K线数据
+            const klineData = displayStock.map(d => [d.open, d.close, d.low, d.high]);
+
+            // 根据图表类型设置因子系列配置
+            let factorSeriesConfig = {};
+
+            switch (currentFactorChartType) {
+                case 'bar':
+                    factorSeriesConfig = {
+                        type: 'bar',
+                        name: '因子值',
+                        data: displayFactorValues,
+                        itemStyle: {
+                            color: '#3b82f6'
+                        }
+                    };
+                    break;
+                case 'area':
+                    factorSeriesConfig = {
+                        type: 'line',
+                        name: '因子值',
+                        data: displayFactorValues,
+                        smooth: true,
+                        showSymbol: false,
+                        lineStyle: {
+                            color: '#ef4444',
+                            width: 2
+                        },
+                        areaStyle: {
+                            color: {
+                                type: 'linear',
+                                x: 0,
+                                y: 0,
+                                x2: 0,
+                                y2: 1,
+                                colorStops: [{
+                                    offset: 0, color: 'rgba(239, 68, 68, 0.3)'
+                                }, {
+                                    offset: 1, color: 'rgba(239, 68, 68, 0.05)'
+                                }]
+                            }
+                        }
+                    };
+                    break;
+                case 'line':
+                default:
+                    factorSeriesConfig = {
+                        type: 'line',
+                        name: '因子值',
+                        data: displayFactorValues,
+                        smooth: true,
+                        showSymbol: false,
+                        lineStyle: {
+                            color: '#ef4444',
+                            width: 2
+                        }
+                    };
+                    break;
+            }
+
+            combinedChart = echarts.init(chartDom);
+
+            const option = {
+                animation: false,
+                // 两个 grid，上面是K线，下面是因子图
+                grid: [
+                    {
+                        left: '10%',
+                        right: '8%',
+                        top: '10%',
+                        height: '50%'
+                    },
+                    {
+                        left: '10%',
+                        right: '8%',
+                        top: '70%',
+                        height: '20%'
+                    }
+                ],
+                xAxis: [
+                    {
+                        type: 'category',
+                        data: displayDates,
+                        gridIndex: 0,
+                        axisLine: { lineStyle: { color: '#94a3b8' } },
+                        axisTick: { show: false },
+                        axisLabel: { show: false },
+                        splitLine: { show: false }
+                    },
+                    {
+                        type: 'category',
+                        data: displayDates,
+                        gridIndex: 1,
+                        axisLine: { lineStyle: { color: '#94a3b8' } },
+                        axisTick: { show: false },
+                        axisLabel: {
+                            fontSize: 11,
+                            fontFamily: "'Fira Sans', sans-serif",
+                            color: '#64748b'
+                        },
+                        splitLine: { show: false }
+                    }
+                ],
+                yAxis: [
+                    {
+                        scale: true,
+                        gridIndex: 0,
+                        axisLine: { show: false },
+                        axisTick: { show: false },
+                        splitLine: {
+                            show: true,
+                            lineStyle: { color: 'rgba(0, 0, 0, 0.05)' }
+                        },
+                        axisLabel: {
+                            fontSize: 11,
+                            fontFamily: "'Fira Code', monospace",
+                            color: '#64748b'
+                        }
+                    },
+                    {
+                        scale: true,
+                        gridIndex: 1,
+                        axisLine: { show: false },
+                        axisTick: { show: false },
+                        splitLine: {
+                            show: true,
+                            lineStyle: { color: 'rgba(0, 0, 0, 0.05)' }
+                        },
+                        axisLabel: {
+                            fontSize: 11,
+                            fontFamily: "'Fira Code', monospace",
+                            color: '#64748b'
+                        }
+                    }
+                ],
+                series: [
+                    {
+                        type: 'candlestick',
+                        name: '日K线',
+                        data: klineData,
+                        xAxisIndex: 0,
+                        yAxisIndex: 0,
+                        itemStyle: {
+                            color: '#ef4444',
+                            color0: '#22c55e',
+                            borderColor: '#ef4444',
+                            borderColor0: '#22c55e'
+                        }
+                    },
+                    {
+                        ...factorSeriesConfig,
+                        name: '因子值',
+                        xAxisIndex: 1,
+                        yAxisIndex: 1
+                    }
+                ],
+                tooltip: {
+                    trigger: 'axis',
+                    axisPointer: {
+                        type: 'line',
+                        lineStyle: {
+                            color: '#ef4444',
+                            width: 1,
+                            type: 'dashed'
+                        },
+                        link: {
+                            xAxisIndex: 'all'
+                        }
+                    },
+                    formatter: function (params) {
+                        let result = '<div style="font-family: \'Fira Code\', monospace; font-size: 12px;">';
+
+                        // 使用统一的日期
+                        const dateIndex = params[0].dataIndex;
+                        const currentDate = displayDates[dateIndex];
+
+                        // 找到K线数据
+                        const klineParam = params.find(p => p.seriesName === '日K线');
+                        if (klineParam) {
+                            const data = displayStock[dateIndex];
+                            if (data) {
+                                const change = ((data.close - data.open) / data.open * 100).toFixed(2);
+                                const changeStr = parseFloat(change) > 0 ? '+' : '';
+                                result += `<div style="margin-bottom: 6px; color: #64748b; font-weight: 500;">${currentDate}</div>`;
+                                result += `<div>开盘: <span style="color: #334155;">${data.open.toFixed(2)}</span></div>`;
+                                result += `<div>收盘: <span style="color: #334155;">${data.close.toFixed(2)}</span></div>`;
+                                result += `<div>最高: <span style="color: #334155;">${data.high.toFixed(2)}</span></div>`;
+                                result += `<div>最低: <span style="color: #334155;">${data.low.toFixed(2)}</span></div>`;
+                                result += `<div style="color: ${parseFloat(change) >= 0 ? '#ef4444' : '#22c55e'}; font-weight: 500;">涨跌: ${changeStr}${change}%</div>`;
+                            }
+                        }
+
+                        // 找到因子数据
+                        const factorParam = params.find(p => p.seriesName === '因子值');
+                        if (factorParam && factorParam.value !== undefined) {
+                            result += `<div style="margin-top: 8px; padding-top: 8px; border-top: 1px solid #e2e8f0;">`;
+                            result += `<span style="color: #ef4444; font-weight: 500;">因子值:</span> <span style="color: #334155;">${factorParam.value.toFixed(4)}</span>`;
+                            result += `</div>`;
+                        }
+
+                        result += '</div>';
+                        return result;
+                    }
+                },
+                axisPointer: {
+                    link: {
+                        xAxisIndex: [0, 1]
+                    }
+                },
+                dataZoom: [
+                    {
+                        type: 'inside',
+                        xAxisIndex: [0, 1],
+                        start: 0,
+                        end: 100
+                    },
+                    {
+                        show: true,
+                        xAxisIndex: [0, 1],
+                        type: 'slider',
+                        bottom: '2%',
+                        start: 0,
+                        end: 100,
+                        height: 20,
+                        borderColor: 'transparent',
+                        fillerColor: 'rgba(239, 68, 68, 0.2)',
+                        handleStyle: {
+                            color: '#ef4444'
+                        }
+                    }
+                ]
+            };
+
+            combinedChart.setOption(option);
+        }
+
+        // 更新图表数据
+        async function updateChartData() {
+            currentChartPeriod = document.getElementById('chart-period').value;
+            await loadChartData();
+        }
+
+        // 更新因子图表类型
+        function updateFactorChartType() {
+            currentFactorChartType = document.getElementById('factor-chart-type').value;
+            drawCombinedChart();
+        }
+
+        // 窗口大小改变时重新调整图表大小
+        window.addEventListener('resize', function() {
+            if (combinedChart) {
+                combinedChart.resize();
+            }
         });
     </script>
 
