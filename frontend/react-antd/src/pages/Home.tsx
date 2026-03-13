@@ -166,7 +166,7 @@ const Home: React.FC = () => {
       <div className="stats-section">
         <Row gutter={[20, 20]}>
           <Col xs={24}>
-            <Card className="quick-start-card" bordered={false}>
+            <Card className="quick-start-card" variant="borderless">
               <Row gutter={[40, 40]} align="middle">
                 <Col xs={24} md={12}>
                   <div className="quick-start-content">
@@ -286,7 +286,7 @@ const Home: React.FC = () => {
             <Col xs={24} lg={12} key={module.id}>
               <Card
                 className="module-card"
-                bordered={false}
+                variant="borderless"
                 hoverable
                 onClick={() => handleModuleClick(module.url)}
               >

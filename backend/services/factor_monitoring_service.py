@@ -151,29 +151,44 @@ class FactorMonitoringService:
         bin_labels = [f"Q{i+1}" for i in range(n_bins)]
 
         # 将时间序列离散化为 bin 索引
-        binned = pd.cut(time_series, bins=bin_edges, labels=False, include_lowest=True)
+        # 使用 duplicates='drop' 处理重复的边界值（当因子有大量重复值时）
+        binned = pd.cut(time_series, bins=bin_edges, labels=False, include_lowest=True, duplicates='drop')
 
-        # 计算转移矩阵
-        transition_matrix = np.zeros((n_bins, n_bins))
-        transition_counts = np.zeros((n_bins, n_bins))
+        # 获取实际的 bin 数量（可能少于 n_bins，因为有重复值被丢弃）
+        actual_bins = binned.nunique() if binned is not None else 1
+        actual_bins = int(actual_bins) if not pd.isna(actual_bins) else n_bins
 
-        for i in range(len(binned) - 1):
-            from_state = int(binned.iloc[i])
-            to_state = int(binned.iloc[i + 1])
-            if 0 <= from_state < n_bins and 0 <= to_state < n_bins:
+        # 如果实际 bin 数量少于预期，使用实际数量
+        effective_bins = min(n_bins, actual_bins)
+
+        # 计算转移矩阵（使用实际的 bin 数量）
+        transition_matrix = np.zeros((effective_bins, effective_bins))
+        transition_counts = np.zeros((effective_bins, effective_bins))
+
+        # 过滤掉 NaN 值
+        binned_clean = binned.dropna()
+
+        for i in range(len(binned_clean) - 1):
+            from_state = int(binned_clean.iloc[i])
+            to_state = int(binned_clean.iloc[i + 1])
+            if 0 <= from_state < effective_bins and 0 <= to_state < effective_bins:
                 transition_counts[from_state, to_state] += 1
 
         # 归一化为概率
-        for i in range(n_bins):
+        for i in range(effective_bins):
             row_sum = transition_counts[i].sum()
             if row_sum > 0:
                 transition_matrix[i] = transition_counts[i] / row_sum
 
+        # 调整标签数量以匹配实际 bin 数量
+        actual_labels = bin_labels[:effective_bins] if effective_bins <= len(bin_labels) else bin_labels
+
         return {
             "matrix": transition_matrix.tolist(),
-            "bin_labels": bin_labels,
+            "bin_labels": actual_labels,
             "bin_edges": [float(e) for e in bin_edges],
-            "interpretation": f"基于{n_bins}个分位数的暴露度转移概率矩阵"
+            "actual_bins": effective_bins,
+            "interpretation": f"基于{effective_bins}个分位数的暴露度转移概率矩阵（原计划{n_bins}个，因有重复值调整为{effective_bins}个）"
         }
 
     def _detect_structural_breaks(

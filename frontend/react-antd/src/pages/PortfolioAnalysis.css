@@ -1,0 +1,258 @@
+/* ========== 全局容器 ========== */
+.portfolio-analysis-container {
+  min-height: 100vh;
+  position: relative;
+  padding: 24px;
+  background: transparent;
+}
+
+/* ========== 背景效果 ========== */
+.portfolio-analysis-container .bg-gradient {
+  position: fixed;
+  inset: 0;
+  background:
+    radial-gradient(circle at 20% 30%, rgba(139, 92, 246, 0.08) 0%, transparent 50%),
+    radial-gradient(circle at 80% 70%, rgba(236, 72, 153, 0.06) 0%, transparent 50%),
+    radial-gradient(circle at 40% 80%, rgba(59, 130, 246, 0.05) 0%, transparent 40%);
+  pointer-events: none;
+  z-index: 0;
+}
+
+.portfolio-analysis-container .bg-grid {
+  position: fixed;
+  inset: 0;
+  background-image:
+    linear-gradient(rgba(139, 92, 246, 0.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(139, 92, 246, 0.03) 1px, transparent 1px);
+  background-size: 60px 60px;
+  pointer-events: none;
+  z-index: 1;
+}
+
+/* ========== 主内容区域 ========== */
+.portfolio-analysis-container .portfolio-analysis-content {
+  position: relative;
+  z-index: 10;
+}
+
+/* ========== 页面头部 ========== */
+.portfolio-analysis-container .page-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+  padding: 20px 24px;
+  background: rgba(255, 255, 255, 0.85);
+  border: 1px solid rgba(139, 92, 246, 0.12);
+  border-radius: 16px;
+  backdrop-filter: blur(20px);
+  box-shadow: 0 2px 12px rgba(139, 92, 246, 0.06);
+}
+
+.portfolio-analysis-container .header-content {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.portfolio-analysis-container .header-icon {
+  font-size: 36px;
+  color: #8b5cf6;
+}
+
+.portfolio-analysis-container .page-title {
+  font-size: 24px;
+  font-weight: 700;
+  margin: 0 0 4px 0;
+  background: linear-gradient(135deg, #8b5cf6 0%, #ec4899 50%, #3b82f6 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.portfolio-analysis-container .page-subtitle {
+  font-size: 14px;
+  color: #64748b;
+  margin: 0;
+}
+
+/* ========== 主卡片 ========== */
+.portfolio-analysis-container .main-card {
+  background: rgba(255, 255, 255, 0.85) !important;
+  border: 1px solid rgba(139, 92, 246, 0.12) !important;
+  border-radius: 16px !important;
+  backdrop-filter: blur(20px);
+  box-shadow: 0 2px 12px rgba(139, 92, 246, 0.06);
+}
+
+/* ========== 配置卡片和结果卡片 ========== */
+.portfolio-analysis-container .config-card,
+.portfolio-analysis-container .result-card {
+  background: rgba(255, 255, 255, 0.9) !important;
+  border: 1px solid rgba(139, 92, 246, 0.1) !important;
+  border-radius: 12px !important;
+  box-shadow: 0 1px 8px rgba(139, 92, 246, 0.04);
+}
+
+.portfolio-analysis-container .config-card .ant-card-head-title,
+.portfolio-analysis-container .result-card .ant-card-head-title {
+  font-weight: 600;
+  font-size: 16px;
+  color: #0f172a;
+}
+
+/* ========== 提示文本 ========== */
+.portfolio-analysis-container .text-hint {
+  font-size: 13px;
+  color: #64748b;
+  margin-bottom: 12px;
+}
+
+/* ========== 占位符 ========== */
+.portfolio-analysis-container .placeholder-content {
+  text-align: center;
+  padding: 60px 20px;
+}
+
+.portfolio-analysis-container .placeholder-icon {
+  font-size: 64px;
+  color: #cbd5e1;
+  margin-bottom: 16px;
+}
+
+.portfolio-analysis-container .placeholder-text {
+  font-size: 16px;
+  color: #64748b;
+  margin: 0 0 8px 0;
+}
+
+.portfolio-analysis-container .placeholder-hint {
+  font-size: 14px;
+  color: #94a3b8;
+  margin: 0;
+}
+
+/* ========== 优化中状态 ========== */
+.portfolio-analysis-container .optimizing-status {
+  text-align: center;
+  padding: 80px 20px;
+}
+
+/* ========== 优化结果 ========== */
+.portfolio-analysis-container .optimization-result {
+  padding: 16px 0;
+}
+
+.portfolio-analysis-container .metrics-section {
+  padding: 20px;
+  background: #f8fafc;
+  border-radius: 12px;
+  margin-bottom: 24px;
+}
+
+.portfolio-analysis-container .chart-section {
+  padding: 16px;
+  background: #f8fafc;
+  border-radius: 12px;
+}
+
+.portfolio-analysis-container .chart-title {
+  font-size: 14px;
+  font-weight: 600;
+  color: #0f172a;
+  margin: 0 0 12px 0;
+}
+
+.portfolio-analysis-container .chart-container {
+  width: 100%;
+}
+
+.portfolio-analysis-container .result-title {
+  font-size: 16px;
+  font-weight: 600;
+  color: #0f172a;
+  margin: 0 0 16px 0;
+}
+
+/* ========== 开发中提示 ========== */
+.portfolio-analysis-container .coming-soon {
+  text-align: center;
+  padding: 80px 20px;
+}
+
+.portfolio-analysis-container .coming-soon-icon {
+  font-size: 64px;
+  color: #cbd5e1;
+  margin-bottom: 16px;
+}
+
+.portfolio-analysis-container .coming-soon h3 {
+  font-size: 20px;
+  font-weight: 600;
+  color: #64748b;
+  margin: 0 0 8px 0;
+}
+
+.portfolio-analysis-container .coming-soon p {
+  font-size: 14px;
+  color: #94a3b8;
+  margin: 0;
+}
+
+/* ========== Select 组件样式 ========== */
+.portfolio-analysis-container .ant-select .ant-select-selector {
+  border-radius: 6px !important;
+  border: 1px solid #d9d9d9 !important;
+  box-shadow: none !important;
+  transition: all 0.2s !important;
+  height: 38px !important;
+}
+
+.portfolio-analysis-container .ant-select:hover .ant-select-selector {
+  border-color: #4096ff !important;
+}
+
+.portfolio-analysis-container .ant-select-focused .ant-select-selector {
+  border-color: #4096ff !important;
+  box-shadow: 0 0 0 2px rgba(64, 150, 255, 0.1) !important;
+}
+
+.portfolio-analysis-container .ant-select-lg .ant-select-selector {
+  height: 40px !important;
+  font-size: 16px;
+  padding: 4px 11px;
+}
+
+.portfolio-analysis-container .ant-select-lg .ant-select-selection-search-input {
+  height: 30px;
+  line-height: 30px;
+}
+
+.portfolio-analysis-container .ant-select-lg .ant-select-selection-placeholder {
+  line-height: 38px;
+}
+
+.portfolio-analysis-container .ant-select-lg .ant-select-selection-item {
+  height: 24px;
+  line-height: 22px;
+  margin-top: 5px;
+}
+
+.portfolio-analysis-container .ant-select-selection-item {
+  border-radius: 4px;
+  background-color: rgba(139, 92, 246, 0.1);
+  border: 1px solid rgba(139, 92, 246, 0.2);
+}
+
+/* ========== 响应式 ========== */
+@media (max-width: 768px) {
+  .portfolio-analysis-container {
+    padding: 16px;
+  }
+
+  .portfolio-analysis-container .page-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 16px;
+  }
+}

@@ -459,7 +459,7 @@ const FactorMining: React.FC = () => {
   // 保存单个因子
   const saveFactor = async (factor: MinedFactor, index: number) => {
     try {
-      // 生成因子名称：Mined_Factor_年月日_序号_股票代码
+      // 生成因子名称：Mined_Factor_序号_年月日_股票代码
       const today = new Date()
       const dateStr = [
         today.getFullYear(),
@@ -467,7 +467,7 @@ const FactorMining: React.FC = () => {
         String(today.getDate()).padStart(2, '0')
       ].join('')
 
-      const factorName = `Mined_Factor_${dateStr}_${index + 1}_${currentStockCode}`
+      const factorName = `Mined_Factor_${index + 1}_${dateStr}_${currentStockCode}`
 
       const factorData = {
         name: factorName,
@@ -515,8 +515,8 @@ const FactorMining: React.FC = () => {
       const factor = miningResult.factors[i]
 
       try {
-        // 生成因子名称：Mined_Factor_年月日_序号_股票代码
-        const factorName = `Mined_Factor_${dateStr}_${i + 1}_${currentStockCode}`
+        // 生成因子名称：Mined_Factor_序号_年月日_股票代码
+        const factorName = `Mined_Factor_${i + 1}_${dateStr}_${currentStockCode}`
 
         const factorData = {
           name: factorName,
@@ -588,7 +588,7 @@ const FactorMining: React.FC = () => {
                 onFinish={startMining}
               >
                 {/* 基础配置 */}
-                <Divider orientationMargin={0} orientation="left">基础配置</Divider>
+                <Divider styles={{ content: { margin: 0 } }} titlePlacement="left">基础配置</Divider>
 
                 <Form.Item
                   label="股票代码"
@@ -608,7 +608,7 @@ const FactorMining: React.FC = () => {
                 </Form.Item>
 
                 {/* 基础因子选择 */}
-                <Divider orientationMargin={0} orientation="left">基础因子选择</Divider>
+                <Divider styles={{ content: { margin: 0 } }} titlePlacement="left">基础因子选择</Divider>
                 <p className="text-hint">选择作为遗传算法输入的基础因子（可搜索因子名称）</p>
 
                 <Form.Item
@@ -629,7 +629,7 @@ const FactorMining: React.FC = () => {
                     optionLabelProp="label"
                     maxTagCount="responsive"
                     size="large"
-                    popupClassName="factor-select-dropdown"
+                    classNames={{ popup: "factor-select-dropdown" }}
                     listHeight={400}
                   >
                     {factors.map(factor => (
@@ -694,7 +694,7 @@ const FactorMining: React.FC = () => {
                 </Form.Item>
 
                 {/* 算法参数 */}
-                <Divider orientationMargin={0} orientation="left">算法参数</Divider>
+                <Divider styles={{ content: { margin: 0 } }} titlePlacement="left">算法参数</Divider>
 
                 <Row gutter={16}>
                   <Col span={12}>
@@ -745,7 +745,7 @@ const FactorMining: React.FC = () => {
                 </Form.Item>
 
                 {/* 适应度函数 */}
-                <Divider orientationMargin={0} orientation="left">适应度函数</Divider>
+                <Divider styles={{ content: { margin: 0 } }} titlePlacement="left">适应度函数</Divider>
 
                 <Form.Item
                   label="优化目标"

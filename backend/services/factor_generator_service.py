@@ -121,35 +121,63 @@ class FactorGeneratorService:
             max_combinations: 最大组合数
 
         Returns:
-            因子表达式列表
+            因子表达式列表（使用pandas链式调用语法）
         """
         expressions = []
 
-        # 需要窗口参数的函数
-        window_functions = ["mean", "std", "max", "min", "median", "skew", "kurtosis"]
+        # 需要窗口参数的函数（使用rolling）
+        window_functions = {
+            "mean": "mean()",
+            "std": "std()",
+            "max": "max()",
+            "min": "min()",
+            "median": "median()",
+            "skew": "skew()",
+            "kurtosis": "kurtosis()",
+        }
 
         # 不需要窗口参数的函数
-        no_window_functions = ["rank", "zscore", "diff", "pct_change", "log", "abs", "sqrt", "exp"]
+        no_window_functions = {
+            "diff": "diff()",
+            "pct_change": "pct_change()",
+            "abs": "abs()",
+        }
 
-        # 需要分位数参数的函数
-        quantile_functions = ["quantile"]
+        # 特殊处理的函数
+        special_functions = {
+            "rank": "rank(pct=True)",
+            "log": "np.log",
+            "sqrt": "np.sqrt",
+            "exp": "np.exp",
+            "zscore": None,  # 需要特殊处理
+        }
 
         for factor in base_factors:
             for stat_func in self.statistics.keys():
                 if stat_func in window_functions:
-                    # 这些函数需要窗口参数
+                    # 这些函数使用rolling
                     for window in window_sizes:
-                        expr = f"{stat_func}({factor}, {window})"
+                        # 生成pandas链式调用语法: factor.rolling(window).mean()
+                        expr = f"({factor}.rolling({window}, min_periods=1).{window_functions[stat_func]})"
                         expressions.append(expr)
-                elif stat_func in quantile_functions:
-                    # 分位数函数需要分位数值参数
-                    for q in [0.25, 0.5, 0.75]:
-                        expr = f"{stat_func}({factor}, {q})"
+                elif stat_func in special_functions:
+                    if special_functions[stat_func] is not None:
+                        # 生成pandas/numpy函数调用语法
+                        expr = f"{special_functions[stat_func]}({factor})"
+                        expressions.append(expr)
+                    elif stat_func == "zscore":
+                        # zscore需要特殊处理: (x - mean) / std
+                        expr = f"(({factor} - {factor}.rolling(252, min_periods=1).mean()) / ({factor}.rolling(252, min_periods=1).std() + 1e-8))"
                         expressions.append(expr)
                 elif stat_func in no_window_functions:
-                    # 这些函数不需要参数
-                    expr = f"{stat_func}({factor})"
+                    # 直接调用方法
+                    expr = f"({factor}.{no_window_functions[stat_func]})"
                     expressions.append(expr)
+                elif stat_func == "quantile":
+                    # 分位数函数
+                    for q in [0.25, 0.5, 0.75]:
+                        expr = f"({factor}.rolling(252, min_periods=1).quantile({q}))"
+                        expressions.append(expr)
 
         return expressions[:max_combinations]
 
@@ -502,18 +530,42 @@ def calculate_factor(df):
                 if pd.isna(ic) or abs(ic) < ic_threshold:
                     continue
 
-                # 计算IR（IC均值/IC标准差）
-                rolling_ic = aligned_data["factor"].rolling(
-                    window=20, min_periods=10
-                ).corr(aligned_data["return"])
+                # 计算IR（IC均值/IC标准差）- 使用正确的滚动相关系数计算方法
+                window = 20
+                min_periods = 10
+                rolling_ic_values = []
 
-                ic_mean = rolling_ic.mean()
-                ic_std = rolling_ic.std()
+                for i in range(len(aligned_data)):
+                    start_idx = max(0, i - window + 1)
+                    end_idx = i + 1
 
-                if pd.isna(ic_std) or ic_std == 0:
-                    ir = 0
+                    window_factor = aligned_data["factor"].iloc[start_idx:end_idx]
+                    window_return = aligned_data["return"].iloc[start_idx:end_idx]
+
+                    valid_data = pd.DataFrame({
+                        "factor": window_factor,
+                        "return": window_return
+                    }).dropna()
+
+                    if len(valid_data) >= min_periods:
+                        ic_val = valid_data["factor"].corr(valid_data["return"])
+                        if not pd.isna(ic_val):
+                            rolling_ic_values.append(ic_val)
+                        else:
+                            rolling_ic_values.append(np.nan)
+                    else:
+                        rolling_ic_values.append(np.nan)
+
+                if rolling_ic_values:
+                    ic_mean = np.nanmean(rolling_ic_values)
+                    ic_std = np.nanstd(rolling_ic_values)
+
+                    if pd.isna(ic_std) or ic_std == 0:
+                        ir = 0
+                    else:
+                        ir = ic_mean / ic_std
                 else:
-                    ir = ic_mean / ic_std
+                    ir = 0
 
                 if ir < ir_threshold:
                     continue
@@ -556,10 +608,31 @@ def calculate_factor(df):
         # 计算IC
         ic = aligned_data["factor"].corr(aligned_data["return"])
 
-        # 计算IR
-        rolling_ic = aligned_data["factor"].rolling(
-            window=20, min_periods=10
-        ).corr(aligned_data["return"])
+        # 计算滚动IR - 使用正确的两变量滚动相关系数计算方法
+        window = 20
+        min_periods = 10
+        rolling_ic_values = []
+
+        for i in range(len(aligned_data)):
+            start_idx = max(0, i - window + 1)
+            end_idx = i + 1
+
+            window_factor = aligned_data["factor"].iloc[start_idx:end_idx]
+            window_return = aligned_data["return"].iloc[start_idx:end_idx]
+
+            valid_data = pd.DataFrame({
+                "factor": window_factor,
+                "return": window_return
+            }).dropna()
+
+            if len(valid_data) >= min_periods:
+                ic_val = valid_data["factor"].corr(valid_data["return"])
+                if not pd.isna(ic_val):
+                    rolling_ic_values.append(ic_val)
+            else:
+                rolling_ic_values.append(np.nan)
+
+        rolling_ic = pd.Series(rolling_ic_values, index=aligned_data.index)
 
         ic_mean = rolling_ic.mean()
         ic_std = rolling_ic.std()

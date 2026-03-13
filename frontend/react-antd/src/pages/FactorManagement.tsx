@@ -15,7 +15,8 @@ import {
   Checkbox,
   Row,
   Col,
-  Tabs
+  Tabs,
+  Tooltip
 } from 'antd'
 import type { ColumnsType, TablePaginationConfig } from 'antd/es/table'
 import {
@@ -25,7 +26,8 @@ import {
   DeleteOutlined,
   EyeOutlined,
   CheckOutlined,
-  CopyOutlined
+  CopyOutlined,
+  QuestionCircleOutlined
 } from '@ant-design/icons'
 import { api } from '@/services/api'
 import './FactorManagement.css'
@@ -71,6 +73,109 @@ const FactorManagement: React.FC = () => {
   const [batchModalVisible, setBatchModalVisible] = useState(false)
   const [form] = Form.useForm()
   const [batchForm] = Form.useForm()
+  const [selectedFormulaType, setSelectedFormulaType] = useState<string>('expression')
+
+  // 公式类型帮助内容（用于Tooltip）
+  const getFormulaHelpContent = (formulaType: string) => {
+    if (formulaType === 'expression') {
+      return (
+        <div style={{ maxWidth: '500px', fontSize: '12px', color: '#fff' }}>
+          <div style={{ marginBottom: '12px' }}>
+            <div style={{ fontWeight: 600, marginBottom: '6px', fontSize: '13px', color: '#fff' }}>表达式类型因子</div>
+            <p style={{ margin: 0, color: '#ccc', lineHeight: '1.6' }}>使用 pandas 链式语法编写因子表达式</p>
+          </div>
+          <div style={{ marginBottom: '12px', paddingBottom: '12px', borderBottom: '1px solid #444' }}>
+            <div style={{ fontWeight: 600, marginBottom: '6px', fontSize: '13px', color: '#fff' }}>可用字段</div>
+            <code style={{ background: 'rgba(255, 255, 255, 0.1)', color: '#4dabf7', padding: '2px 6px', borderRadius: '4px', fontFamily: 'monospace', fontSize: '12px' }}>close, open, high, low, volume, amount</code>
+          </div>
+          <div style={{ marginBottom: '12px', paddingBottom: '12px', borderBottom: '1px solid #444' }}>
+            <div style={{ fontWeight: 600, marginBottom: '6px', fontSize: '13px', color: '#fff' }}>常用函数</div>
+            <ul style={{ listStyle: 'none', padding: 0, margin: 0 }}>
+              <li style={{ padding: '2px 0', color: '#fff', fontSize: '12px', lineHeight: '1.6' }}>• <code style={{ color: '#4dabf7', background: 'rgba(255, 255, 255, 0.1)', padding: '2px 4px', borderRadius: '3px' }}>rolling(n).mean()</code> - n日移动平均</li>
+              <li style={{ padding: '2px 0', color: '#fff', fontSize: '12px', lineHeight: '1.6' }}>• <code style={{ color: '#4dabf7', background: 'rgba(255, 255, 255, 0.1)', padding: '2px 4px', borderRadius: '3px' }}>rolling(n).std()</code> - n日标准差</li>
+              <li style={{ padding: '2px 0', color: '#fff', fontSize: '12px', lineHeight: '1.6' }}>• <code style={{ color: '#4dabf7', background: 'rgba(255, 255, 255, 0.1)', padding: '2px 4px', borderRadius: '3px' }}>rolling(n).max()</code> / <code style={{ color: '#4dabf7', background: 'rgba(255, 255, 255, 0.1)', padding: '2px 4px', borderRadius: '3px' }}>rolling(n).min()</code> - n日最大/最小值</li>
+              <li style={{ padding: '2px 0', color: '#fff', fontSize: '12px', lineHeight: '1.6' }}>• <code style={{ color: '#4dabf7', background: 'rgba(255, 255, 255, 0.1)', padding: '2px 4px', borderRadius: '3px' }}>shift(n)</code> - 向前移n行</li>
+              <li style={{ padding: '2px 0', color: '#fff', fontSize: '12px', lineHeight: '1.6' }}>• <code style={{ color: '#4dabf7', background: 'rgba(255, 255, 255, 0.1)', padding: '2px 4px', borderRadius: '3px' }}>diff()</code> - 一阶差分</li>
+              <li style={{ padding: '2px 0', color: '#fff', fontSize: '12px', lineHeight: '1.6' }}>• <code style={{ color: '#4dabf7', background: 'rgba(255, 255, 255, 0.1)', padding: '2px 4px', borderRadius: '3px' }}>pct_change()</code> - 百分比变化</li>
+            </ul>
+          </div>
+          <div>
+            <div style={{ fontWeight: 600, marginBottom: '6px', fontSize: '13px', color: '#fff' }}>示例</div>
+            <ul style={{ listStyle: 'none', padding: 0, margin: 0 }}>
+              <li style={{ padding: '2px 0', color: '#fff', fontSize: '12px', lineHeight: '1.6' }}>• <code style={{ color: '#4dabf7', background: 'rgba(255, 255, 255, 0.1)', padding: '2px 4px', borderRadius: '3px' }}>close.rolling(20).mean()</code> - 20日均线</li>
+              <li style={{ padding: '2px 0', color: '#fff', fontSize: '12px', lineHeight: '1.6' }}>• <code style={{ color: '#4dabf7', background: 'rgba(255, 255, 255, 0.1)', padding: '2px 4px', borderRadius: '3px' }}>close / close.rolling(20).mean()</code> - 相对20日均线</li>
+              <li style={{ padding: '2px 0', color: '#fff', fontSize: '12px', lineHeight: '1.6' }}>• <code style={{ color: '#4dabf7', background: 'rgba(255, 255, 255, 0.1)', padding: '2px 4px', borderRadius: '3px' }}>close.pct_change(5)</code> - 5日收益率</li>
+            </ul>
+          </div>
+        </div>
+      )
+    } else {
+      return (
+        <div style={{ maxWidth: '600px', fontSize: '12px', color: '#fff' }}>
+          <div style={{ marginBottom: '12px' }}>
+            <div style={{ fontWeight: 600, marginBottom: '6px', fontSize: '13px', color: '#fff' }}>函数类型因子</div>
+            <p style={{ margin: 0, color: '#ccc', lineHeight: '1.6' }}>支持预定义函数和自定义def函数两种写法</p>
+          </div>
+          <div style={{ marginBottom: '12px', paddingBottom: '12px', borderBottom: '1px solid #444' }}>
+            <div style={{ fontWeight: 600, marginBottom: '6px', fontSize: '13px', color: '#fff' }}>方式一：预定义函数</div>
+            <ul style={{ listStyle: 'none', padding: 0, margin: 0 }}>
+              <li style={{ padding: '2px 0', color: '#fff', fontSize: '12px', lineHeight: '1.6' }}>• <code style={{ color: '#4dabf7', background: 'rgba(255, 255, 255, 0.1)', padding: '2px 4px', borderRadius: '3px' }}>RSI(close, 14)</code> - 14日RSI</li>
+              <li style={{ padding: '2px 0', color: '#fff', fontSize: '12px', lineHeight: '1.6' }}>• <code style={{ color: '#4dabf7', background: 'rgba(255, 255, 255, 0.1)', padding: '2px 4px', borderRadius: '3px' }}>MACD(close, 12, 26, 9)[0]</code> - MACD快线</li>
+              <li style={{ padding: '2px 0', color: '#fff', fontSize: '12px', lineHeight: '1.6' }}>• <code style={{ color: '#4dabf7', background: 'rgba(255, 255, 255, 0.1)', padding: '2px 4px', borderRadius: '3px' }}>EMA(close, 20)</code> - 20日指数移动平均</li>
+              <li style={{ padding: '2px 0', color: '#fff', fontSize: '12px', lineHeight: '1.6' }}>• <code style={{ color: '#4dabf7', background: 'rgba(255, 255, 255, 0.1)', padding: '2px 4px', borderRadius: '3px' }}>SMA(close, 60)</code> / <code style={{ color: '#4dabf7', background: 'rgba(255, 255, 255, 0.1)', padding: '2px 4px', borderRadius: '3px' }}>MA(close, 60)</code> - 简单移动平均</li>
+              <li style={{ padding: '2px 0', color: '#fff', fontSize: '12px', lineHeight: '1.6' }}>• <code style={{ color: '#4dabf7', background: 'rgba(255, 255, 255, 0.1)', padding: '2px 4px', borderRadius: '3px' }}>BOLL(close, 20, 2)</code> - 布林带上轨</li>
+              <li style={{ padding: '2px 0', color: '#fff', fontSize: '12px', lineHeight: '1.6' }}>• <code style={{ color: '#4dabf7', background: 'rgba(255, 255, 255, 0.1)', padding: '2px 4px', borderRadius: '3px' }}>KDJ(high, low, close, 9, 3, 3)[0]</code> - KDJ的K值</li>
+              <li style={{ padding: '2px 0', color: '#fff', fontSize: '12px', lineHeight: '1.6' }}>• <code style={{ color: '#4dabf7', background: 'rgba(255, 255, 255, 0.1)', padding: '2px 4px', borderRadius: '3px' }}>ATR(high, low, close, 14)</code> - 14日ATR</li>
+            </ul>
+          </div>
+          <div style={{ marginBottom: '12px', paddingBottom: '12px', borderBottom: '1px solid #444' }}>
+            <div style={{ fontWeight: 600, marginBottom: '6px', fontSize: '13px', color: '#fff' }}>方式二：自定义def函数</div>
+            <p style={{ margin: '0 0 8px 0', color: '#ccc', lineHeight: '1.6', fontSize: '12px' }}>使用Python def语法编写复杂逻辑（⚠️ 函数名必须为 calculate_factor）</p>
+            <ul style={{ listStyle: 'none', padding: 0, margin: 0 }}>
+              <li style={{ padding: '2px 0', color: '#fff', fontSize: '12px', lineHeight: '1.6' }}>• <strong style={{ color: '#f59e0b' }}>函数名必须固定为：</strong><code style={{ color: '#f59e0b', background: 'rgba(245, 158, 11, 0.1)', padding: '2px 4px', borderRadius: '3px' }}>def calculate_factor(df):</code></li>
+              <li style={{ padding: '2px 0', color: '#fff', fontSize: '12px', lineHeight: '1.6' }}>• 参数 <code style={{ color: '#4dabf7', background: 'rgba(255, 255, 255, 0.1)', padding: '2px 4px', borderRadius: '3px' }}>df</code> 是包含 open/high/low/close/volume 的 DataFrame</li>
+              <li style={{ padding: '2px 0', color: '#fff', fontSize: '12px', lineHeight: '1.6' }}>• 必须返回 Series 或可转换为 Series 的数组</li>
+              <li style={{ padding: '2px 0', color: '#fff', fontSize: '12px', lineHeight: '1.6' }}>• 支持多行代码、条件判断、循环等复杂逻辑</li>
+              <li style={{ padding: '2px 0', color: '#fff', fontSize: '12px', lineHeight: '1.6' }}>• <strong style={{ color: '#10b981' }}>✓ 完全兼容麦语言函数：</strong><code style={{ color: '#10b981', background: 'rgba(16, 185, 129, 0.1)', padding: '2px 4px', borderRadius: '3px' }}>REF, HHV, LLV, CROSS, IF, MA, SUM, STD</code> 等</li>
+            </ul>
+          </div>
+          <div>
+            <div style={{ fontWeight: 600, marginBottom: '6px', fontSize: '13px', color: '#fff' }}>def函数示例</div>
+            <ul style={{ listStyle: 'none', padding: 0, margin: 0 }}>
+              <li style={{ padding: '4px 0', color: '#fff', fontSize: '12px', lineHeight: '1.6' }}>
+                <div style={{ marginBottom: '4px', color: '#ccc' }}>• 条件组合因子：</div>
+                <code style={{ display: 'block', color: '#4dabf7', background: 'rgba(0, 0, 0, 0.3)', padding: '6px 8px', borderRadius: '4px', fontSize: '11px', fontFamily: 'monospace', whiteSpace: 'pre-wrap', marginTop: '4px' }}>def calculate_factor(df):
+    ma20 = df['close'].rolling(20).mean()
+    ma60 = df['close'].rolling(60).mean()
+    return (ma20 &gt; ma60).astype(int)</code>
+              </li>
+              <li style={{ padding: '4px 0', color: '#fff', fontSize: '12px', lineHeight: '1.6' }}>
+                <div style={{ marginBottom: '4px', color: '#ccc' }}>• 使用麦语言函数：</div>
+                <code style={{ display: 'block', color: '#4dabf7', background: 'rgba(0, 0, 0, 0.3)', padding: '6px 8px', borderRadius: '4px', fontSize: '11px', fontFamily: 'monospace', whiteSpace: 'pre-wrap', marginTop: '4px' }}>def calculate_factor(df):
+    ma5 = MA(df['close'], 5)
+    ma10 = MA(df['close'], 10)
+    return CROSS(ma5, ma10).astype(int)</code>
+              </li>
+              <li style={{ padding: '4px 0', color: '#fff', fontSize: '12px', lineHeight: '1.6' }}>
+                <div style={{ marginBottom: '4px', color: '#ccc' }}>• 带条件判断的因子：</div>
+                <code style={{ display: 'block', color: '#4dabf7', background: 'rgba(0, 0, 0, 0.3)', padding: '6px 8px', borderRadius: '4px', fontSize: '11px', fontFamily: 'monospace', whiteSpace: 'pre-wrap', marginTop: '4px' }}>def calculate_factor(df):
+    rsi = RSI(df['close'], 14)
+    return np.where(rsi &gt; 70, -1, np.where(rsi &lt; 30, 1, 0))</code>
+              </li>
+              <li style={{ padding: '4px 0', color: '#fff', fontSize: '12px', lineHeight: '1.6' }}>
+                <div style={{ marginBottom: '4px', color: '#ccc' }}>• 波动率加权因子：</div>
+                <code style={{ display: 'block', color: '#4dabf7', background: 'rgba(0, 0, 0, 0.3)', padding: '6px 8px', borderRadius: '4px', fontSize: '11px', fontFamily: 'monospace', whiteSpace: 'pre-wrap', marginTop: '4px' }}>def calculate_factor(df):
+    ret = df['close'].pct_change()
+    vol = ret.rolling(20).std()
+    signal = (df['close'] &gt; df['close'].shift(1)).astype(int)
+    return signal * vol</code>
+              </li>
+            </ul>
+          </div>
+        </div>
+      )
+    }
+  }
 
   // 加载因子列表
   const loadFactors = async () => {
@@ -341,18 +446,21 @@ const FactorManagement: React.FC = () => {
       </div>
 
       {/* Tab分类 */}
-      <Card className="tab-card" bordered={false} style={{ marginBottom: '16px' }}>
+      <Card className="tab-card" variant="borderless" style={{ marginBottom: '16px' }}>
         <Tabs
           activeKey={activeTab}
           onChange={(key) => setActiveTab(key as 'user' | 'preset')}
-        >
-          <Tabs.TabPane tab={`自定义因子 (${factors.filter(f => f.source === 'user').length})`} key="user">
-            {null}
-          </Tabs.TabPane>
-          <Tabs.TabPane tab={`系统预置因子 (${factors.filter(f => f.source === 'preset').length})`} key="preset">
-            {null}
-          </Tabs.TabPane>
-        </Tabs>
+          items={[
+            {
+              key: 'user',
+              label: `自定义因子 (${factors.filter(f => f.source === 'user').length})`
+            },
+            {
+              key: 'preset',
+              label: `系统预置因子 (${factors.filter(f => f.source === 'preset').length})`
+            }
+          ]}
+        />
       </Card>
 
       {/* 工具栏 */}
@@ -466,7 +574,7 @@ const FactorManagement: React.FC = () => {
         }}
         footer={null}
         width={600}
-        destroyOnClose
+        destroyOnHidden
       >
         <Form
           form={form}
@@ -507,21 +615,27 @@ const FactorManagement: React.FC = () => {
             name="formula_type"
             initialValue="expression"
           >
-            <Select>
+            <Select onChange={(value) => setSelectedFormulaType(value)}>
               <Option value="expression">表达式</Option>
               <Option value="function">函数</Option>
             </Select>
           </Form.Item>
 
           <Form.Item
-            label="因子代码"
+            label={
+              <Space>
+                <span>因子代码</span>
+                <Tooltip title={getFormulaHelpContent(selectedFormulaType)} placement="right" overlayStyle={{ maxWidth: '600px' }}>
+                  <QuestionCircleOutlined style={{ color: '#1890ff', cursor: 'help' }} />
+                </Tooltip>
+              </Space>
+            }
             name="code"
             rules={[{ required: true, message: '请输入因子代码' }]}
-            extra="支持 Python 表达式，可使用 close, open, high, low, volume 等字段"
           >
             <TextArea
               rows={6}
-              placeholder="例如：RSI(close, 14)"
+              placeholder={selectedFormulaType === 'expression' ? '例如：close.rolling(20).mean()' : '例如：def calculate_factor(df):\n    return df["close"].rolling(20).mean()'}
               className="font-mono"
               style={{
                 backgroundColor: '#f6f8fa',
@@ -559,7 +673,7 @@ const FactorManagement: React.FC = () => {
         }}
         footer={null}
         width={800}
-        destroyOnClose
+        destroyOnHidden
       >
         <Form
           form={batchForm}

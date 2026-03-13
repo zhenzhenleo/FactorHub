@@ -177,7 +177,11 @@
       "Bash(npm run build)",
       "Bash(npm install react-simple-code-editor highlight.js)",
       "Bash(npm run dev)",
-      "Bash(findstr \":3000\")"
+      "Bash(findstr \":3000\")",
+      "Bash(node tests/test_factor_naming.js)",
+      "Bash(test -f \"f:\\\\pythonproject\\\\FactorFlow\\\\frontend\\\\react-antd\\\\src\\\\pages\\\\PortfolioAnalysis.tsx\")",
+      "Bash(npx tsc --noEmit src/pages/PortfolioAnalysis.tsx)",
+      "Bash(npx tsc --noEmit --skipLibCheck src/pages/FactorManagement.tsx)"
     ],
     "deny": [],
     "ask": []

@@ -194,6 +194,9 @@ class FactorCalculator:
             return pd.Series([value] * length)
 
         return {
+            # 移动平均函数
+            "SMA": SMA,
+            "MA": MA,
             # 引用函数
             "REF": REF,
             # 极值函数

@@ -33,35 +33,69 @@ class GeneticFactorMiningService:
         n_generations: int = 20,
         cx_prob: float = 0.7,
         mut_prob: float = 0.3,
+        factor_calculator=None,
     ):
         """
         初始化遗传算法挖掘服务
 
         Args:
-            base_factors: 基础因子列表
-            data: 数据DataFrame
+            base_factors: 基础因子代码列表（如 ["RSI(close, 14)", "close / open"]）
+            data: 数据DataFrame（包含OHLCV列）
             return_column: 收益率列名
             population_size: 种群大小
             n_generations: 迭代代数
             cx_prob: 交叉概率
             mut_prob: 变异概率
+            factor_calculator: 因子计算器实例（可选）
         """
         if not DEAP_AVAILABLE:
             raise ImportError("DEAP库未安装，请运行: pip install DEAP")
 
-        self.base_factors = base_factors
+        self.base_factor_codes = base_factors
         self.data = data
         self.return_column = return_column
         self.population_size = population_size
         self.n_generations = n_generations
         self.cx_prob = cx_prob
         self.mut_prob = mut_prob
+        self.factor_calculator = factor_calculator
 
         # 准备收益率数据
         self.return_values = data[return_column] if return_column in data.columns else None
 
+        # 预计算基础因子值（存储为字典，方便表达式计算）
+        self.base_factor_values = {}
+        self._precompute_base_factors()
+
         # 初始化遗传算法
         self._setup_genetic_algorithm()
+
+    def _precompute_base_factors(self):
+        """预计算所有基础因子的值"""
+        if self.factor_calculator is None:
+            # 如果没有提供计算器，使用默认的
+            from backend.services.factor_service import factor_service
+            self.factor_calculator = factor_service.calculator
+
+        logger.info(f"预计算 {len(self.base_factor_codes)} 个基础因子...")
+
+        for i, factor_code in enumerate(self.base_factor_codes):
+            try:
+                factor_values = self.factor_calculator.calculate(self.data, factor_code)
+                if factor_values is not None and len(factor_values.dropna()) > 0:
+                    # 使用唯一的变量名（避免代码中的特殊字符）
+                    var_name = f"factor_{i}"
+                    self.base_factor_values[var_name] = {
+                        "code": factor_code,
+                        "values": factor_values
+                    }
+                    logger.info(f"  [{i+1}/{len(self.base_factor_codes)}] {factor_code}: {len(factor_values.dropna())} 个有效值")
+                else:
+                    logger.warning(f"  [{i+1}/{len(self.base_factor_codes)}] {factor_code}: 计算失败或无有效值")
+            except Exception as e:
+                logger.warning(f"  [{i+1}/{len(self.base_factor_codes)}] {factor_code}: 计算出错 - {e}")
+
+        logger.info(f"成功预计算 {len(self.base_factor_values)} 个基础因子")
 
     def _setup_genetic_algorithm(self):
         """设置遗传算法"""
@@ -102,31 +136,57 @@ class GeneticFactorMiningService:
         self.stats.register("min", np.min)
         self.stats.register("max", np.max)
 
+        # 进度回调函数（可选）
+        self.progress_callback = None
+
+    def set_progress_callback(self, callback):
+        """设置进度回调函数
+
+        Args:
+            callback: 回调函数，签名为 callback(generation, total_generations, best_fitness, avg_fitness)
+        """
+        self.progress_callback = callback
+
     def _generate_random_individual(self):
         """生成随机个体（因子表达式）"""
-        # 使用因子生成器生成混合因子
-        factors = factor_generator_service.generate_hybrid_factors(
-            self.base_factors,
-            n_factors=1
-        )
+        # 使用预计算的因子变量名
+        var_names = list(self.base_factor_values.keys())
 
-        if factors:
-            expr = factors[0]["expression"]
+        if not var_names:
+            # 如果没有可用的基础因子，返回空个体
+            individual = creator.Individual()
+            individual.extend(["close"])
+            return individual
+
+        # 随机选择表达式类型
+        expr_type = random.choice(["single", "binary", "unary"])
+
+        if expr_type == "single" or len(var_names) == 1:
+            # 单个因子
+            var = random.choice(var_names)
+            individual = creator.Individual()
+            individual.extend([var])
+            return individual
+
+        elif expr_type == "binary" and len(var_names) >= 2:
+            # 二元运算组合
+            var1, var2 = random.sample(var_names, 2)
+            op = random.choice(["+", "-", "*", "/"])
+            individual = creator.Individual()
+            individual.extend([f"({var1} {op} {var2})"])
+            return individual
+
+        else:  # unary
+            # 一元运算
+            var = random.choice(var_names)
+            func = random.choice(["np.log", "np.sqrt", "np.abs", "rank"])
+            if func == "rank":
+                expr = f"({var}.rank(pct=True))"
+            else:
+                expr = f"{func}({var})"
             individual = creator.Individual()
             individual.extend([expr])
             return individual
-        else:
-            # 如果生成失败，返回简单的二元运算
-            if len(self.base_factors) >= 2:
-                factor1, factor2 = random.sample(self.base_factors, 2)
-                op = random.choice(["+", "-", "*", "/"])
-                individual = creator.Individual()
-                individual.extend([f"({factor1} {op} {factor2})"])
-                return individual
-            else:
-                individual = creator.Individual()
-                individual.extend([self.base_factors[0]])
-                return individual
 
     def _evaluate_factor(self, individual: list) -> tuple:
         """
@@ -171,37 +231,71 @@ class GeneticFactorMiningService:
         计算因子表达式的值
 
         Args:
-            expr: 因子表达式
+            expr: 因子表达式（包含变量名如 factor_0, factor_1）
 
         Returns:
             因子值序列
         """
         try:
             # 构建安全的执行环境
+            # 将变量名映射到预计算的因子值Series
             safe_dict = {}
 
-            # 添加基础因子数据到环境
-            for factor_name in self.base_factors:
-                if factor_name in self.data.columns:
-                    safe_dict[factor_name] = self.data[factor_name]
+            # 添加预计算的基础因子值到环境
+            for var_name, factor_info in self.base_factor_values.items():
+                safe_dict[var_name] = factor_info["values"]
 
-            # 如果没有数据，返回None
+            # 添加常用的numpy和pandas函数
+            safe_dict["np"] = np
+            safe_dict["pd"] = pd
+
+            # 添加原始数据列（close, open, high, low, volume）
+            for col in ["open", "high", "low", "close", "volume"]:
+                if col in self.data.columns:
+                    safe_dict[col] = self.data[col]
+
+            # 如果没有可用的数据，返回None
             if not safe_dict:
+                logger.warning("没有可用的因子数据用于表达式计算")
                 return None
 
-            # 使用pandas.eval进行安全计算（比eval更安全）
+            # 使用eval计算表达式
             try:
-                result = pd.eval(expr, local_dict=safe_dict)
+                result = eval(expr, {"__builtins__": {}}, safe_dict)
+
                 # 确保返回的是Series
                 if isinstance(result, pd.Series):
-                    return result
-                elif isinstance(result, (int, float)):
+                    # 如果表达式包含log或sqrt，处理无效值
+                    if "log" in expr or "sqrt" in expr:
+                        # 替换-inf和inf为NaN，然后用前向填充
+                        result = result.replace([np.inf, -np.inf], np.nan)
+                        # 可选：进行简单的处理，例如用0填充NaN
+                        # result = result.fillna(0)
+                elif isinstance(result, (int, float, np.number)):
                     # 如果是标量值，返回与数据长度相同的Series
-                    return pd.Series([result] * len(self.data), index=self.data.index)
+                    return pd.Series([float(result)] * len(self.data), index=self.data.index)
                 else:
+                    logger.warning(f"表达式返回了不支持的类型: {type(result)}")
                     return None
-            except Exception:
-                # 如果pandas.eval失败，尝试简单的二元运算
+
+                # 检查结果是否有效
+                if isinstance(result, pd.Series):
+                    valid_count = result.notna().sum()
+                    if valid_count == 0:
+                        logger.warning(f"表达式计算结果全部为NaN: {expr}")
+                        return None
+                    # 如果大部分值都是NaN，也认为无效
+                    if valid_count < len(result) * 0.1:  # 少于10%有效值
+                        logger.warning(f"表达式计算结果大部分为NaN ({valid_count}/{len(result)}): {expr}")
+                        return None
+
+                return result
+
+            except NameError as e:
+                logger.warning(f"表达式中包含未定义的变量: {e}")
+                return None
+            except Exception as e:
+                logger.warning(f"计算表达式失败: {e}")
                 return self._compute_binary_operation(expr)
 
         except Exception as e:
@@ -272,17 +366,16 @@ class GeneticFactorMiningService:
         # 去除空格
         factor_name = factor_name.strip()
 
-        # 检查是否是基础因子
+        # 检查是否是预计算的因子变量名（如 factor_0, factor_1）
+        if factor_name in self.base_factor_values:
+            return self.base_factor_values[factor_name]["values"]
+
+        # 检查是否是原始数据列
         if factor_name in self.data.columns:
             return self.data[factor_name]
 
-        # 检查是否是技术指标
-        if "SMA" in factor_name or "EMA" in factor_name or "RSI" in factor_name:
-            # 简化处理：返回close列
-            if "close" in self.data.columns:
-                return self.data["close"]
-
         # 如果都不匹配，返回None
+        logger.warning(f"未找到因子: {factor_name}")
         return None
 
     def _extract_inner_expression(self, expr: str) -> str:
@@ -322,17 +415,24 @@ class GeneticFactorMiningService:
         expr1 = ind1[0]
         expr2 = ind2[0]
 
-        # 提取因子并交换
-        factors1 = [f for f in self.base_factors if f in expr1]
-        factors2 = [f for f in self.base_factors if f in expr2]
+        # 获取变量名列表
+        var_names = list(self.base_factor_values.keys())
 
-        if factors1 and factors2 and random.random() < 0.7:
-            # 70%概率交换因子
-            factor1 = random.choice(factors1)
-            factor2 = random.choice(factors2)
+        if not var_names:
+            # 如果没有可用的因子变量，直接交换整个表达式
+            return (ind2, ind1)
 
-            new_expr1 = expr1.replace(factor1, factor2)
-            new_expr2 = expr2.replace(factor2, factor1)
+        # 提取表达式中的变量并交换
+        vars1 = [v for v in var_names if v in expr1]
+        vars2 = [v for v in var_names if v in expr2]
+
+        if vars1 and vars2 and random.random() < 0.7:
+            # 70%概率交换变量
+            var1 = random.choice(vars1)
+            var2 = random.choice(vars2)
+
+            new_expr1 = expr1.replace(var1, var2)
+            new_expr2 = expr2.replace(var2, var1)
 
             # 创建新的Individual对象
             child1 = creator.Individual()
@@ -348,9 +448,12 @@ class GeneticFactorMiningService:
         """变异操作"""
         expr = individual[0]
 
+        # 获取变量名列表
+        var_names = list(self.base_factor_values.keys())
+
         # 可能的变异操作：
         # 1. 更换运算符
-        # 2. 更换因子
+        # 2. 更换因子变量
         # 3. 添加统计函数
 
         if random.random() < 0.3:
@@ -360,27 +463,60 @@ class GeneticFactorMiningService:
                 if op in expr and random.random() < indpb:
                     new_op = random.choice([o for o in operators if o != op])
                     expr = expr.replace(op, new_op, 1)
+                    break
 
-        if random.random() < 0.3:
-            # 更换因子
-            for factor in self.base_factors:
-                if factor in expr and random.random() < indpb:
-                    new_factor = random.choice(
-                        [f for f in self.base_factors if f != factor]
-                    )
-                    expr = expr.replace(factor, new_factor, 1)
+        if random.random() < 0.3 and var_names:
+            # 更换因子变量
+            for var in var_names:
+                if var in expr and random.random() < indpb:
+                    other_vars = [v for v in var_names if v != var]
+                    if other_vars:
+                        new_var = random.choice(other_vars)
+                        expr = expr.replace(var, new_var, 1)
+                        break
 
-        if random.random() < 0.2:
-            # 添加统计函数
-            stats = ["rank", "zscore", "mean", "std"]
-            stat = random.choice(stats)
-            # 简化版：不实际添加，只在记录中标记
-            pass
+        if random.random() < 0.2 and var_names:
+            # 添加/移除一元函数
+            if random.random() < 0.5:
+                # 添加函数
+                var = random.choice([v for v in var_names if v in expr])
+                func = random.choice(["np.log", "np.sqrt", "np.abs"])
+                # 只对第一次出现的变量添加函数
+                expr = expr.replace(var, f"{func}({var})", 1)
+            else:
+                # 简化：如果表达式以函数开头，尝试移除函数
+                for func in ["np.log", "np.sqrt", "np.abs"]:
+                    if expr.startswith(f"{func}(") and expr.endswith(")"):
+                        # 提取内部表达式
+                        inner = expr[len(func)+1:-1]
+                        if inner in var_names:
+                            expr = inner
+                            break
 
         # 创建新的Individual对象并返回
         mutated = creator.Individual()
         mutated.extend([expr])
         return (mutated,)
+
+    def _convert_expression_to_code(self, expr: str) -> str:
+        """
+        将占位符表达式转换为实际因子代码
+
+        Args:
+            expr: 包含占位符的表达式（如 "(factor_0 * 1.5)"）
+
+        Returns:
+            实际因子代码表达式（如 "(RSI(close, 14) * 1.5)"）
+        """
+        converted_expr = expr
+
+        # 将所有占位符变量名替换为实际因子代码
+        for var_name, factor_info in self.base_factor_values.items():
+            actual_code = factor_info["code"]
+            # 替换占位符
+            converted_expr = converted_expr.replace(var_name, f"({actual_code})")
+
+        return converted_expr
 
     def mine_factors(self) -> Dict:
         """
@@ -403,33 +539,81 @@ class GeneticFactorMiningService:
         # 初始化种群
         population = self.toolbox.population(n=self.population_size)
 
+        # 评估初始种群
+        fitnesses = list(map(self.toolbox.evaluate, population))
+        for ind, fit in zip(population, fitnesses):
+            ind.fitness.values = fit
+
         # 创建Hall of Fame保存最优个体
         halloffame = tools.HallOfFame(10)
+        halloffame.update(population)
 
-        # 运行遗传算法
-        population, logbook = algorithms.eaSimple(
-            population,
-            self.toolbox,
-            cxpb=self.cx_prob,
-            mutpb=self.mut_prob,
-            ngen=self.n_generations,
-            stats=self.stats,
-            halloffame=halloffame,
-            verbose=True,
-        )
+        # 记录统计信息
+        logbook = tools.Logbook()
+        logbook.record(gen=0, **self.stats.compile(population))
+
+        # 开始进化循环
+        for gen in range(1, self.n_generations + 1):
+            # 选择下一代
+            offspring = self.toolbox.select(population, len(population))
+            offspring = list(map(self.toolbox.clone, offspring))
+
+            # 交叉
+            for i in range(1, len(offspring), 2):
+                if random.random() < self.cx_prob:
+                    offspring[i - 1], offspring[i] = self.toolbox.mate(offspring[i - 1], offspring[i])
+                    del offspring[i - 1].fitness.values
+                    del offspring[i].fitness.values
+
+            # 变异
+            for i in range(len(offspring)):
+                if random.random() < self.mut_prob:
+                    offspring[i], = self.toolbox.mutate(offspring[i])
+                    del offspring[i].fitness.values
+
+            # 评估新的个体
+            invalid_ind = [ind for ind in offspring if not ind.fitness.valid]
+            fitnesses = list(map(self.toolbox.evaluate, invalid_ind))
+            for ind, fit in zip(invalid_ind, fitnesses):
+                ind.fitness.values = fit
+
+            # 替换种群
+            population[:] = offspring
+
+            # 更新Hall of Fame
+            halloffame.update(population)
+
+            # 记录统计信息
+            record = self.stats.compile(population)
+            logbook.record(gen=gen, **record)
+
+            # 调用进度回调
+            if self.progress_callback:
+                best_fitness = record.get("max", 0.0)
+                avg_fitness = record.get("avg", 0.0)
+                self.progress_callback(gen, self.n_generations, best_fitness, avg_fitness)
+
+            logger.info(f"Generation {gen}/{self.n_generations} - Best: {record.get('max', 0):.4f}, Avg: {record.get('avg', 0):.4f}")
 
         # 提取最优因子
         best_factors = []
         for i, individual in enumerate(halloffame):
+            # 获取原始表达式（包含占位符）
+            placeholder_expr = individual[0]
+
+            # 转换为实际因子代码
+            actual_expr = self._convert_expression_to_code(placeholder_expr)
+
             factor_info = {
                 "rank": i + 1,
-                "expression": individual[0],
+                "expression": actual_expr,  # 使用实际代码而不是占位符
+                "placeholder_expression": placeholder_expr,  # 保留占位符表达式用于调试
                 "fitness": float(individual.fitness.values[0]),
             }
 
             # 重新计算详细指标
             try:
-                factor_values = self._compute_factor_expression(individual[0])
+                factor_values = self._compute_factor_expression(placeholder_expr)
                 if factor_values is not None and self.return_values is not None:
                     validation = factor_validation_service.validate_factor(
                         factor_values=factor_values,
@@ -510,14 +694,16 @@ class GeneticFactorMiningService:
 def create_genetic_mining_service(
     base_factors: List[str],
     data: pd.DataFrame,
+    factor_calculator=None,
     **kwargs
 ) -> GeneticFactorMiningService:
     """
     创建遗传算法挖掘服务
 
     Args:
-        base_factors: 基础因子列表
-        data: 数据
+        base_factors: 基础因子代码列表（如 ["RSI(close, 14)", "close / open"]）
+        data: 包含OHLCV的数据
+        factor_calculator: 因子计算器实例（可选）
         **kwargs: 其他参数
 
     Returns:
@@ -526,5 +712,6 @@ def create_genetic_mining_service(
     return GeneticFactorMiningService(
         base_factors=base_factors,
         data=data,
+        factor_calculator=factor_calculator,
         **kwargs
     )

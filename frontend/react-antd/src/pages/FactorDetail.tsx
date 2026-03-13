@@ -84,6 +84,108 @@ const InfoTooltip: React.FC<{ title: string; content: string }> = ({ title, cont
   </Tooltip>
 )
 
+// 公式类型帮助内容（用于Tooltip）
+const getFormulaHelpContent = (formulaType: string) => {
+  if (formulaType === 'expression') {
+    return (
+      <div style={{ maxWidth: '500px', fontSize: '12px', color: '#fff' }}>
+        <div style={{ marginBottom: '12px' }}>
+          <div style={{ fontWeight: 600, marginBottom: '6px', fontSize: '13px', color: '#fff' }}>表达式类型因子</div>
+          <p style={{ margin: 0, color: '#ccc', lineHeight: '1.6' }}>使用 pandas 链式语法编写因子表达式</p>
+        </div>
+        <div style={{ marginBottom: '12px', paddingBottom: '12px', borderBottom: '1px solid #444' }}>
+          <div style={{ fontWeight: 600, marginBottom: '6px', fontSize: '13px', color: '#fff' }}>可用字段</div>
+          <code style={{ background: 'rgba(255, 255, 255, 0.1)', color: '#4dabf7', padding: '2px 6px', borderRadius: '4px', fontFamily: 'monospace', fontSize: '12px' }}>close, open, high, low, volume, amount</code>
+        </div>
+        <div style={{ marginBottom: '12px', paddingBottom: '12px', borderBottom: '1px solid #444' }}>
+          <div style={{ fontWeight: 600, marginBottom: '6px', fontSize: '13px', color: '#fff' }}>常用函数</div>
+          <ul style={{ listStyle: 'none', padding: 0, margin: 0 }}>
+            <li style={{ padding: '2px 0', color: '#fff', fontSize: '12px', lineHeight: '1.6' }}>• <code style={{ color: '#4dabf7', background: 'rgba(255, 255, 255, 0.1)', padding: '2px 4px', borderRadius: '3px' }}>rolling(n).mean()</code> - n日移动平均</li>
+            <li style={{ padding: '2px 0', color: '#fff', fontSize: '12px', lineHeight: '1.6' }}>• <code style={{ color: '#4dabf7', background: 'rgba(255, 255, 255, 0.1)', padding: '2px 4px', borderRadius: '3px' }}>rolling(n).std()</code> - n日标准差</li>
+            <li style={{ padding: '2px 0', color: '#fff', fontSize: '12px', lineHeight: '1.6' }}>• <code style={{ color: '#4dabf7', background: 'rgba(255, 255, 255, 0.1)', padding: '2px 4px', borderRadius: '3px' }}>rolling(n).max()</code> / <code style={{ color: '#4dabf7', background: 'rgba(255, 255, 255, 0.1)', padding: '2px 4px', borderRadius: '3px' }}>rolling(n).min()</code> - n日最大/最小值</li>
+            <li style={{ padding: '2px 0', color: '#fff', fontSize: '12px', lineHeight: '1.6' }}>• <code style={{ color: '#4dabf7', background: 'rgba(255, 255, 255, 0.1)', padding: '2px 4px', borderRadius: '3px' }}>shift(n)</code> - 向前移n行</li>
+            <li style={{ padding: '2px 0', color: '#fff', fontSize: '12px', lineHeight: '1.6' }}>• <code style={{ color: '#4dabf7', background: 'rgba(255, 255, 255, 0.1)', padding: '2px 4px', borderRadius: '3px' }}>diff()</code> - 一阶差分</li>
+            <li style={{ padding: '2px 0', color: '#fff', fontSize: '12px', lineHeight: '1.6' }}>• <code style={{ color: '#4dabf7', background: 'rgba(255, 255, 255, 0.1)', padding: '2px 4px', borderRadius: '3px' }}>pct_change()</code> - 百分比变化</li>
+          </ul>
+        </div>
+        <div>
+          <div style={{ fontWeight: 600, marginBottom: '6px', fontSize: '13px', color: '#fff' }}>示例</div>
+          <ul style={{ listStyle: 'none', padding: 0, margin: 0 }}>
+            <li style={{ padding: '2px 0', color: '#fff', fontSize: '12px', lineHeight: '1.6' }}>• <code style={{ color: '#4dabf7', background: 'rgba(255, 255, 255, 0.1)', padding: '2px 4px', borderRadius: '3px' }}>close.rolling(20).mean()</code> - 20日均线</li>
+            <li style={{ padding: '2px 0', color: '#fff', fontSize: '12px', lineHeight: '1.6' }}>• <code style={{ color: '#4dabf7', background: 'rgba(255, 255, 255, 0.1)', padding: '2px 4px', borderRadius: '3px' }}>close / close.rolling(20).mean()</code> - 相对20日均线</li>
+            <li style={{ padding: '2px 0', color: '#fff', fontSize: '12px', lineHeight: '1.6' }}>• <code style={{ color: '#4dabf7', background: 'rgba(255, 255, 255, 0.1)', padding: '2px 4px', borderRadius: '3px' }}>close.pct_change(5)</code> - 5日收益率</li>
+          </ul>
+        </div>
+      </div>
+    )
+  } else {
+    return (
+      <div style={{ maxWidth: '600px', fontSize: '12px', color: '#fff' }}>
+        <div style={{ marginBottom: '12px' }}>
+          <div style={{ fontWeight: 600, marginBottom: '6px', fontSize: '13px', color: '#fff' }}>函数类型因子</div>
+          <p style={{ margin: 0, color: '#ccc', lineHeight: '1.6' }}>支持预定义函数和自定义def函数两种写法</p>
+        </div>
+        <div style={{ marginBottom: '12px', paddingBottom: '12px', borderBottom: '1px solid #444' }}>
+          <div style={{ fontWeight: 600, marginBottom: '6px', fontSize: '13px', color: '#fff' }}>方式一：预定义函数</div>
+          <ul style={{ listStyle: 'none', padding: 0, margin: 0 }}>
+            <li style={{ padding: '2px 0', color: '#fff', fontSize: '12px', lineHeight: '1.6' }}>• <code style={{ color: '#4dabf7', background: 'rgba(255, 255, 255, 0.1)', padding: '2px 4px', borderRadius: '3px' }}>RSI(close, 14)</code> - 14日RSI</li>
+            <li style={{ padding: '2px 0', color: '#fff', fontSize: '12px', lineHeight: '1.6' }}>• <code style={{ color: '#4dabf7', background: 'rgba(255, 255, 255, 0.1)', padding: '2px 4px', borderRadius: '3px' }}>MACD(close, 12, 26, 9)[0]</code> - MACD快线</li>
+            <li style={{ padding: '2px 0', color: '#fff', fontSize: '12px', lineHeight: '1.6' }}>• <code style={{ color: '#4dabf7', background: 'rgba(255, 255, 255, 0.1)', padding: '2px 4px', borderRadius: '3px' }}>EMA(close, 20)</code> - 20日指数移动平均</li>
+            <li style={{ padding: '2px 0', color: '#fff', fontSize: '12px', lineHeight: '1.6' }}>• <code style={{ color: '#4dabf7', background: 'rgba(255, 255, 255, 0.1)', padding: '2px 4px', borderRadius: '3px' }}>SMA(close, 60)</code> / <code style={{ color: '#4dabf7', background: 'rgba(255, 255, 255, 0.1)', padding: '2px 4px', borderRadius: '3px' }}>MA(close, 60)</code> - 简单移动平均</li>
+            <li style={{ padding: '2px 0', color: '#fff', fontSize: '12px', lineHeight: '1.6' }}>• <code style={{ color: '#4dabf7', background: 'rgba(255, 255, 255, 0.1)', padding: '2px 4px', borderRadius: '3px' }}>BOLL(close, 20, 2)</code> - 布林带上轨</li>
+            <li style={{ padding: '2px 0', color: '#fff', fontSize: '12px', lineHeight: '1.6' }}>• <code style={{ color: '#4dabf7', background: 'rgba(255, 255, 255, 0.1)', padding: '2px 4px', borderRadius: '3px' }}>KDJ(high, low, close, 9, 3, 3)[0]</code> - KDJ的K值</li>
+            <li style={{ padding: '2px 0', color: '#fff', fontSize: '12px', lineHeight: '1.6' }}>• <code style={{ color: '#4dabf7', background: 'rgba(255, 255, 255, 0.1)', padding: '2px 4px', borderRadius: '3px' }}>ATR(high, low, close, 14)</code> - 14日ATR</li>
+          </ul>
+        </div>
+        <div style={{ marginBottom: '12px', paddingBottom: '12px', borderBottom: '1px solid #444' }}>
+          <div style={{ fontWeight: 600, marginBottom: '6px', fontSize: '13px', color: '#fff' }}>方式二：自定义def函数</div>
+          <p style={{ margin: '0 0 8px 0', color: '#ccc', lineHeight: '1.6', fontSize: '12px' }}>使用Python def语法编写复杂逻辑（⚠️ 函数名必须为 calculate_factor）</p>
+          <ul style={{ listStyle: 'none', padding: 0, margin: 0 }}>
+            <li style={{ padding: '2px 0', color: '#fff', fontSize: '12px', lineHeight: '1.6' }}>• <strong style={{ color: '#f59e0b' }}>函数名必须固定为：</strong><code style={{ color: '#f59e0b', background: 'rgba(245, 158, 11, 0.1)', padding: '2px 4px', borderRadius: '3px' }}>def calculate_factor(df):</code></li>
+            <li style={{ padding: '2px 0', color: '#fff', fontSize: '12px', lineHeight: '1.6' }}>• 参数 <code style={{ color: '#4dabf7', background: 'rgba(255, 255, 255, 0.1)', padding: '2px 4px', borderRadius: '3px' }}>df</code> 是包含 open/high/low/close/volume 的 DataFrame</li>
+            <li style={{ padding: '2px 0', color: '#fff', fontSize: '12px', lineHeight: '1.6' }}>• 必须返回 Series 或可转换为 Series 的数组</li>
+            <li style={{ padding: '2px 0', color: '#fff', fontSize: '12px', lineHeight: '1.6' }}>• 支持多行代码、条件判断、循环等复杂逻辑</li>
+            <li style={{ padding: '2px 0', color: '#fff', fontSize: '12px', lineHeight: '1.6' }}>• <strong style={{ color: '#10b981' }}>✓ 完全兼容麦语言函数：</strong><code style={{ color: '#10b981', background: 'rgba(16, 185, 129, 0.1)', padding: '2px 4px', borderRadius: '3px' }}>REF, HHV, LLV, CROSS, IF, MA, SUM, STD</code> 等</li>
+          </ul>
+        </div>
+        <div>
+          <div style={{ fontWeight: 600, marginBottom: '6px', fontSize: '13px', color: '#fff' }}>def函数示例</div>
+          <ul style={{ listStyle: 'none', padding: 0, margin: 0 }}>
+            <li style={{ padding: '4px 0', color: '#fff', fontSize: '12px', lineHeight: '1.6' }}>
+              <div style={{ marginBottom: '4px', color: '#ccc' }}>• 条件组合因子：</div>
+              <code style={{ display: 'block', color: '#4dabf7', background: 'rgba(0, 0, 0, 0.3)', padding: '6px 8px', borderRadius: '4px', fontSize: '11px', fontFamily: 'monospace', whiteSpace: 'pre-wrap', marginTop: '4px' }}>def calculate_factor(df):
+    ma20 = df['close'].rolling(20).mean()
+    ma60 = df['close'].rolling(60).mean()
+    return (ma20 &gt; ma60).astype(int)</code>
+            </li>
+            <li style={{ padding: '4px 0', color: '#fff', fontSize: '12px', lineHeight: '1.6' }}>
+              <div style={{ marginBottom: '4px', color: '#ccc' }}>• 使用麦语言函数：</div>
+              <code style={{ display: 'block', color: '#4dabf7', background: 'rgba(0, 0, 0, 0.3)', padding: '6px 8px', borderRadius: '4px', fontSize: '11px', fontFamily: 'monospace', whiteSpace: 'pre-wrap', marginTop: '4px' }}>def calculate_factor(df):
+    ma5 = MA(df['close'], 5)
+    ma10 = MA(df['close'], 10)
+    return CROSS(ma5, ma10).astype(int)</code>
+            </li>
+            <li style={{ padding: '4px 0', color: '#fff', fontSize: '12px', lineHeight: '1.6' }}>
+              <div style={{ marginBottom: '4px', color: '#ccc' }}>• 带条件判断的因子：</div>
+              <code style={{ display: 'block', color: '#4dabf7', background: 'rgba(0, 0, 0, 0.3)', padding: '6px 8px', borderRadius: '4px', fontSize: '11px', fontFamily: 'monospace', whiteSpace: 'pre-wrap', marginTop: '4px' }}>def calculate_factor(df):
+    rsi = RSI(df['close'], 14)
+    return np.where(rsi &gt; 70, -1, np.where(rsi &lt; 30, 1, 0))</code>
+            </li>
+            <li style={{ padding: '4px 0', color: '#fff', fontSize: '12px', lineHeight: '1.6' }}>
+              <div style={{ marginBottom: '4px', color: '#ccc' }}>• 波动率加权因子：</div>
+              <code style={{ display: 'block', color: '#4dabf7', background: 'rgba(0, 0, 0, 0.3)', padding: '6px 8px', borderRadius: '4px', fontSize: '11px', fontFamily: 'monospace', whiteSpace: 'pre-wrap', marginTop: '4px' }}>def calculate_factor(df):
+    ret = df['close'].pct_change()
+    vol = ret.rolling(20).std()
+    signal = (df['close'] &gt; df['close'].shift(1)).astype(int)
+    return signal * vol</code>
+            </li>
+          </ul>
+        </div>
+      </div>
+    )
+  }
+}
+
 const FactorDetail: React.FC = () => {
   const [searchParams] = useSearchParams()
   const navigate = useNavigate()
@@ -2134,9 +2236,19 @@ const FactorDetail: React.FC = () => {
   useEffect(() => {
     if (factor) {
       window.scrollTo({ top: 0, behavior: 'smooth' })
-      loadChartData()
+      // 清理旧的行情图表实例，确保因子变化时重新创建干净的图表
+      if (chartsRef.current['price']) {
+        chartsRef.current['price'].dispose()
+        delete chartsRef.current['price']
+      }
+      // 清空旧的图表数据
+      setChartData(null)
+      // 延迟加载新的图表数据
+      setTimeout(() => {
+        loadChartData()
+      }, 50)
     }
-  }, [factor])
+  }, [factor, loadChartData])
 
   // 图表绘制
   useEffect(() => {
@@ -2257,12 +2369,12 @@ const FactorDetail: React.FC = () => {
         {loading ? (
           <Col span={24}>
             <div className="loading-container">
-              <Spin size="large" tip="加载中..." />
+              <Spin size="large" description="加载中..." />
             </div>
           </Col>
         ) : !factor ? (
           <Col span={24}>
-            <Card className="empty-card" bordered={false}>
+            <Card className="empty-card" variant="borderless">
               <p>{id ? '因子不存在或已被删除' : '未指定因子ID'}</p>
               <Button type="primary" onClick={() => navigate('/factor-management')} style={{ marginTop: '16px' }}>
                 返回因子列表
@@ -2274,10 +2386,10 @@ const FactorDetail: React.FC = () => {
             {/* 左栏 - 基本信息和因子公式 */}
             <Col xs={24} lg={6} className="left-column">
               {/* 基本信息卡片 */}
-              <Card className="basic-info-card" bordered={false}>
+              <Card className="basic-info-card" variant="borderless">
                 <div className="info-header">
                   <h2 className="factor-title">{factor.name}</h2>
-                  <Space direction="vertical" size="small" style={{ width: '100%' }}>
+                  <Space orientation="vertical" size="small" style={{ width: '100%' }}>
                     <Button
                       icon={<ArrowLeftOutlined />}
                       onClick={() => navigate('/factor-management')}
@@ -2345,7 +2457,7 @@ const FactorDetail: React.FC = () => {
               </Card>
 
               {/* 因子公式卡片 */}
-              <Card className="formula-card" bordered={false} style={{ marginTop: '16px' }}>
+              <Card className="formula-card" variant="borderless" style={{ marginTop: '16px' }}>
                 <div className="formula-header">
                   <h3>因子公式</h3>
                   {factor.source === 'user' && (
@@ -2365,7 +2477,7 @@ const FactorDetail: React.FC = () => {
             {/* 右栏 - 数据筛选和分析Tab */}
             <Col xs={24} lg={18} className="right-column">
               {/* 数据筛选卡片 */}
-              <Card className="filter-card" bordered={false}>
+              <Card className="filter-card" variant="borderless">
                 <Row gutter={[16, 16]} align="middle">
                   <Col xs={24} sm={8}>
                     <Input
@@ -2415,778 +2527,824 @@ const FactorDetail: React.FC = () => {
               </Card>
 
               {/* 分析Tab页 */}
-              <Card className="analysis-tabs-card" bordered={false} style={{ marginTop: '16px' }}>
-                <Tabs activeKey={activeTabKey} onChange={setActiveTabKey}>
-                  <Tabs.TabPane tab="行情图表" key="chart">
-                    {/* 图表类型选择 */}
-                    <div style={{ marginBottom: '16px' }}>
-                      <Space>
-                    <Select
-                      value={factorChartType}
-                      onChange={(value) => setFactorChartType(value)}
-                      style={{ width: 140 }}
-                    >
-                      <Option value="overlay">双轴同图</Option>
-                      <Option value="normalized">单轴归一化</Option>
-                      <Option value="line">折线图</Option>
-                      <Option value="bar">柱状图</Option>
-                      <Option value="area">面积图</Option>
-                    </Select>
-                    <Button
-                      icon={<ReloadOutlined />}
-                      size="small"
-                      onClick={loadChartData}
-                      loading={loadingChart}
-                    >
-                      刷新
-                    </Button>
-                      </Space>
-                    </div>
-                    <div ref={priceChartRef} className="chart-container large"></div>
-                  </Tabs.TabPane>
-
-                  <Tabs.TabPane tab="因子暴露度" key="exposure">
-                    {!exposureData ? (
-                      <div style={{ textAlign: 'center', padding: '60px 20px', color: '#64748b' }}>
-                        <LineChartOutlined style={{ fontSize: '48px', marginBottom: '16px' }} />
-                        <p>{loadingAnalysisTabs ? '加载中...' : '请先点击"分析因子"按钮进行因子分析'}</p>
-                      </div>
-                    ) : (
-                      <>
-                        {/* 迷你数据卡片 */}
-                        <Card className="stats-card" bordered={false} style={{ marginBottom: '16px' }}>
-                          <Row gutter={[16, 16]}>
-                            <Col xs={12} sm={6}>
-                              <Statistic
-                                title={
-                                  <InfoTooltip
-                                    title="当前因子值"
-                                    content="最新一天计算的因子值，反映了当前时点的因子暴露水平。用于判断当前因子处于高值还是低值状态。"
-                                  />
-                                }
-                                value={exposureData.current_value ?? '-'}
-                                precision={4}
-                                valueStyle={{ color: '#3b82f6', fontSize: '18px', fontWeight: 'bold' }}
-                              />
-                            </Col>
-                            <Col xs={12} sm={6}>
-                              <Statistic
-                                title={
-                                  <InfoTooltip
-                                    title="分位数"
-                                    content="当前因子值在历史分布中的百分位。例如：80%表示当前值高于历史上80%的时间。用于判断因子暴露相对历史的高低水平。"
-                                  />
-                                }
-                                value={exposureData.percentile ?? '-'}
-                                precision={1}
-                                suffix="%"
-                                valueStyle={{
-                                  color: (exposureData.percentile ?? 50) > 50 ? '#ef4444' : '#22c55e',
-                                  fontSize: '18px',
-                                  fontWeight: 'bold'
-                                }}
-                              />
-                            </Col>
-                            <Col xs={12} sm={6}>
-                              <Statistic
-                                title={
-                                  <InfoTooltip
-                                    title="滚动标准差"
-                                    content="过去20个交易日的因子值标准差，反映因子的波动性。标准差越大说明因子值波动越剧烈，稳定性越差。"
-                                  />
-                                }
-                                value={exposureData.latest_std ?? '-'}
-                                precision={4}
-                              />
-                            </Col>
-                            <Col xs={12} sm={6}>
-                              <Statistic
-                                title={
-                                  <InfoTooltip
-                                    title="变异系数"
-                                    content="标准差与均值的比值（无量纲），用于比较不同波动水平。CV越大说明相对波动越大。一般CV<0.3为低波动，0.3-0.7为中等，>0.7为高波动。"
-                                  />
-                                }
-                                value={exposureData.cv ?? '-'}
-                                precision={4}
-                              />
-                            </Col>
-                          </Row>
-                        </Card>
-
-                        {/* 分位数指示器 */}
-                        <Card
-                          title={
-                            <InfoTooltip
-                              title="因子暴露度分位数"
-                              content="显示当前因子值在历史分布中的位置，用于判断因子暴露相对水平。分位数越低表示因子值越低（低暴露），越高表示因子值越高（高暴露）。"
-                            />
-                          }
-                          bordered={false}
-                          style={{ marginBottom: '16px' }}
-                        >
-                          <div style={{ marginBottom: '8px' }}>
-                            <span style={{ fontWeight: 500 }}>当前分位数：</span>
-                            <span style={{ marginLeft: '8px', color: '#64748b' }}>
-                              {exposureData.percentile?.toFixed(1)}%
-                            </span>
+              <Card className="analysis-tabs-card" variant="borderless" style={{ marginTop: '16px' }}>
+                <Tabs
+                  activeKey={activeTabKey}
+                  onChange={setActiveTabKey}
+                  items={[
+                    {
+                      key: 'chart',
+                      label: '行情图表',
+                      children: (
+                        <>
+                          {/* 图表类型选择 */}
+                          <div style={{ marginBottom: '16px' }}>
+                            <Space>
+                              <Select
+                                value={factorChartType}
+                                onChange={(value) => setFactorChartType(value)}
+                                style={{ width: 140 }}
+                              >
+                                <Option value="overlay">双轴同图</Option>
+                                <Option value="normalized">单轴归一化</Option>
+                                <Option value="line">折线图</Option>
+                                <Option value="bar">柱状图</Option>
+                                <Option value="area">面积图</Option>
+                              </Select>
+                              <Button
+                                icon={<ReloadOutlined />}
+                                size="small"
+                                onClick={loadChartData}
+                                loading={loadingChart}
+                              >
+                                刷新
+                              </Button>
+                            </Space>
                           </div>
-                          <div style={{ position: 'relative' }}>
-                            <Progress
-                              percent={exposureData.percentile ?? 0}
-                              status="active"
-                              strokeColor={{
-                                '0%': '#22c55e',
-                                '50%': '#eab308',
-                                '100%': '#ef4444',
-                              }}
-                              showInfo={false}
-                            />
-                          </div>
-                          <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '4px', fontSize: '12px', color: '#64748b' }}>
-                            <span>低暴露</span>
-                            <span>中等</span>
-                            <span>高暴露</span>
-                          </div>
-                        </Card>
+                          <div ref={priceChartRef} className="chart-container large"></div>
+                        </>
+                      )
+                    },
+                    {
+                      key: 'exposure',
+                      label: '因子暴露度',
+                      children: (
+                        <>
+                          {!exposureData ? (
+                            <div style={{ textAlign: 'center', padding: '60px 20px', color: '#64748b' }}>
+                              <LineChartOutlined style={{ fontSize: '48px', marginBottom: '16px' }} />
+                              <p>{loadingAnalysisTabs ? '加载中...' : '请先点击"分析因子"按钮进行因子分析'}</p>
+                            </div>
+                          ) : (
+                            <>
+                              {/* 迷你数据卡片 */}
+                              <Card className="stats-card" variant="borderless" style={{ marginBottom: '16px' }}>
+                                <Row gutter={[16, 16]}>
+                                  <Col xs={12} sm={6}>
+                                    <Statistic
+                                      title={
+                                        <InfoTooltip
+                                          title="当前因子值"
+                                          content="最新一天计算的因子值，反映了当前时点的因子暴露水平。用于判断当前因子处于高值还是低值状态。"
+                                        />
+                                      }
+                                      value={exposureData.current_value ?? '-'}
+                                      precision={4}
+                                      styles={{ content: { color: '#3b82f6', fontSize: '18px', fontWeight: 'bold' } }}
+                                    />
+                                  </Col>
+                                  <Col xs={12} sm={6}>
+                                    <Statistic
+                                      title={
+                                        <InfoTooltip
+                                          title="分位数"
+                                          content="当前因子值在历史分布中的百分位。例如：80%表示当前值高于历史上80%的时间。用于判断因子暴露相对历史的高低水平。"
+                                        />
+                                      }
+                                      value={exposureData.percentile ?? '-'}
+                                      precision={1}
+                                      suffix="%"
+                                      styles={{
+                                        content: {
+                                          color: (exposureData.percentile ?? 50) > 50 ? '#ef4444' : '#22c55e',
+                                          fontSize: '18px',
+                                          fontWeight: 'bold'
+                                        }
+                                      }}
+                                    />
+                                  </Col>
+                                  <Col xs={12} sm={6}>
+                                    <Statistic
+                                      title={
+                                        <InfoTooltip
+                                          title="滚动标准差"
+                                          content="过去20个交易日的因子值标准差，反映因子的波动性。标准差越大说明因子值波动越剧烈，稳定性越差。"
+                                        />
+                                      }
+                                      value={exposureData.latest_std ?? '-'}
+                                      precision={4}
+                                    />
+                                  </Col>
+                                  <Col xs={12} sm={6}>
+                                    <Statistic
+                                      title={
+                                        <InfoTooltip
+                                          title="变异系数"
+                                          content="标准差与均值的比值（无量纲），用于比较不同波动水平。CV越大说明相对波动越大。一般CV<0.3为低波动，0.3-0.7为中等，>0.7为高波动。"
+                                        />
+                                      }
+                                      value={exposureData.cv ?? '-'}
+                                      precision={4}
+                                    />
+                                  </Col>
+                                </Row>
+                              </Card>
 
-                        {/* 分位数时间序列曲线 */}
-                        <Card
-                          title={
-                            <InfoTooltip
-                              title="分位数变化曲线"
-                              content="展示因子值分位数随时间的变化趋势，可以观察因子暴露的周期性和趋势性。适用于判断因子是否处于周期性波动，以及识别极端暴露时期。"
-                            />
-                          }
-                          bordered={false}
-                          style={{ marginBottom: '16px' }}
-                        >
-                          <div ref={percentileTimeSeriesRef} className="chart-container" style={{ height: '350px' }}></div>
-                        </Card>
-
-                        {/* 历史分布直方图 */}
-                        <Card
-                          title={
-                            <InfoTooltip
-                              title="历史分布直方图"
-                              content="展示因子值的历史频率分布，帮助判断因子是否符合正态分布、是否存在肥尾效应。用于识别极端值和评估因子的统计特性。"
-                            />
-                          }
-                          bordered={false}
-                        >
-                          <div ref={exposureHistogramRef} className="chart-container" style={{ height: '350px' }}></div>
-                        </Card>
-                      </>
-                    )}
-                  </Tabs.TabPane>
-
-                  <Tabs.TabPane tab="因子有效性" key="effectiveness">
-                    {!effectivenessData ? (
-                      <div style={{ textAlign: 'center', padding: '60px 20px', color: '#64748b' }}>
-                        <ExperimentOutlined style={{ fontSize: '48px', marginBottom: '16px' }} />
-                        <p>{loadingAnalysisTabs ? '加载中...' : '请先点击"分析因子"按钮进行因子分析'}</p>
-                      </div>
-                    ) : (
-                      <>
-                        {/* IC统计卡片 */}
-                        <Card className="stats-card" bordered={false} style={{ marginBottom: '16px' }}>
-                          <Row gutter={[16, 16]}>
-                            <Col xs={12} sm={6}>
-                              <Statistic
+                              {/* 分位数指示器 */}
+                              <Card
                                 title={
                                   <InfoTooltip
-                                    title="IC均值"
-                                    content="Information Coefficient均值，衡量因子值与未来收益的相关性。IC>0表示因子值越高收益越高，IC<0则相反。绝对值>0.03为有效，>0.05为优秀。"
+                                    title="因子暴露度分位数"
+                                    content="显示当前因子值在历史分布中的位置，用于判断因子暴露相对水平。分位数越低表示因子值越低（低暴露），越高表示因子值越高（高暴露）。"
                                   />
                                 }
-                                value={effectivenessData.ic_time_series?.ic_mean ?? '-'}
-                                precision={effectivenessData.ic_time_series?.ic_mean !== undefined ? 4 : undefined}
-                                valueStyle={{
-                                  color: (effectivenessData.ic_time_series?.ic_mean || 0) > 0 ? '#ef4444' : '#22c55e',
-                                  fontSize: '20px',
-                                  fontWeight: 'bold'
-                                }}
-                              />
-                            </Col>
-                            <Col xs={12} sm={6}>
-                              <Statistic
-                                title={
-                                  <InfoTooltip
-                                    title="IC标准差"
-                                    content="IC的波动性度量，标准差越小IC越稳定。稳定性是因子有效性的重要指标，低标准差意味着因子在不同时期表现一致。"
+                                variant="borderless"
+                                style={{ marginBottom: '16px' }}
+                              >
+                                <div style={{ marginBottom: '8px' }}>
+                                  <span style={{ fontWeight: 500 }}>当前分位数：</span>
+                                  <span style={{ marginLeft: '8px', color: '#64748b' }}>
+                                    {exposureData.percentile?.toFixed(1)}%
+                                  </span>
+                                </div>
+                                <div style={{ position: 'relative' }}>
+                                  <Progress
+                                    percent={exposureData.percentile ?? 0}
+                                    status="active"
+                                    strokeColor={{
+                                      '0%': '#22c55e',
+                                      '50%': '#eab308',
+                                      '100%': '#ef4444',
+                                    }}
+                                    showInfo={false}
                                   />
-                                }
-                                value={effectivenessData.ic_time_series?.ic_std ?? '-'}
-                                precision={effectivenessData.ic_time_series?.ic_std !== undefined ? 4 : undefined}
-                              />
-                            </Col>
-                            <Col xs={12} sm={6}>
-                              <Statistic
-                                title={
-                                  <InfoTooltip
-                                    title="IR比率"
-                                    content="Information Ratio = IC均值/IC标准差，综合衡量因子有效性和稳定性。IR>0.5为良好，>1.0为优秀。IR越高说明因子既有效又稳定。"
-                                  />
-                                }
-                                value={effectivenessData.ic_time_series?.ir ?? '-'}
-                                precision={effectivenessData.ic_time_series?.ir !== undefined ? 4 : undefined}
-                                valueStyle={{ color: '#22c55e' }}
-                              />
-                            </Col>
-                            <Col xs={12} sm={6}>
-                              <Statistic
-                                title={
-                                  <InfoTooltip
-                                    title="IC>0比例"
-                                    content="IC为正的天数占比，衡量因子胜率。>50%说明因子多数时期有效，>60%为优秀。高胜率意味着因子可靠性更强。"
-                                  />
-                                }
-                                value={effectivenessData.ic_time_series?.ic_positive_ratio ?? '-'}
-                                precision={effectivenessData.ic_time_series?.ic_positive_ratio !== undefined ? 2 : undefined}
-                                suffix={effectivenessData.ic_time_series?.ic_positive_ratio !== undefined ? '%' : ''}
-                              />
-                            </Col>
-                          </Row>
-                        </Card>
+                                </div>
+                                <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '4px', fontSize: '12px', color: '#64748b' }}>
+                                  <span>低暴露</span>
+                                  <span>中等</span>
+                                  <span>高暴露</span>
+                                </div>
+                              </Card>
 
-                        {/* 因子有效性图表 */}
-                        <Row gutter={[16, 16]}>
-                          <Col xs={24} lg={24}>
-                            <Card
-                              title={
-                                <InfoTooltip
-                                  title="因子-收益散点图"
-                                  content="横轴为因子值，纵轴为未来收益，散点分布反映因子与收益的相关性。若呈现明显向上（下）趋势，说明正（负）相关。点的分布越集中说明相关性越稳定。用于直观判断因子有效性。"
-                                />
-                              }
-                              bordered={false}
-                            >
-                              {effectivenessData.scatter_plot?.error ? (
-                                <div style={{ textAlign: 'center', padding: '40px', color: '#ef4444' }}>
-                                  {effectivenessData.scatter_plot.error}
-                                </div>
-                              ) : (
-                                <div ref={scatterChartRef} className="chart-container" style={{ height: '400px' }}></div>
-                              )}
-                            </Card>
-                          </Col>
-                          <Col xs={24} lg={24}>
-                            <Card
-                              title={
-                                <InfoTooltip
-                                  title="IC时序分析"
-                                  content="展示每日IC值的时间序列，包含IC曲线、零线和±1标准差带。用于识别因子在不同时期的有效性变化，识别失效时期。IC持续在零线以上说明因子稳定有效。"
-                                />
-                              }
-                              bordered={false}
-                            >
-                              {effectivenessData.ic_time_series?.error ? (
-                                <div style={{ textAlign: 'center', padding: '40px', color: '#ef4444' }}>
-                                  {effectivenessData.ic_time_series.error}
-                                </div>
-                              ) : (
-                                <div ref={icTimeSeriesChartRef} className="chart-container" style={{ height: '400px' }}></div>
-                              )}
-                            </Card>
-                          </Col>
-                          <Col xs={24} lg={24}>
-                            <Card
-                              title={
-                                <InfoTooltip
-                                  title="事件响应分析（高/低暴露后收益）"
-                                  content="当因子值突破高/低阈值后N天的累计收益分布。用于识别因子极端暴露的预测能力，红色（高暴露）高于绿色（低暴露）说明因子能够预测未来收益。"
-                                />
-                              }
-                              bordered={false}
-                            >
-                              {effectivenessData.event_response?.error ? (
-                                <div style={{ textAlign: 'center', padding: '40px', color: '#ef4444' }}>
-                                  {effectivenessData.event_response.error}
-                                </div>
-                              ) : (
-                                <div ref={eventResponseChartRef} className="chart-container" style={{ height: '400px' }}></div>
-                              )}
-                            </Card>
-                          </Col>
-                          <Col xs={24} lg={24}>
-                            <Card
-                              title={
-                                <InfoTooltip
-                                  title="因子衰减曲线（IC vs 持有期）"
-                                  content="展示因子预测能力随持有期延长而衰减的曲线。IC随持有期下降越快，说明因子信息越短暂。用于确定最佳持有周期，通常选择IC衰减前的持仓周期。"
-                                />
-                              }
-                              bordered={false}
-                            >
-                              {effectivenessData.decay_analysis?.error ? (
-                                <div style={{ textAlign: 'center', padding: '40px', color: '#ef4444' }}>
-                                  {effectivenessData.decay_analysis.error}
-                                </div>
-                              ) : (
-                                <div ref={decayCurveChartRef} className="chart-container" style={{ height: '400px' }}></div>
-                              )}
-                            </Card>
-                          </Col>
-                        </Row>
-                      </>
-                    )}
-                  </Tabs.TabPane>
+                              {/* 分位数时间序列曲线 */}
+                              <Card
+                                title={
+                                  <InfoTooltip
+                                    title="分位数变化曲线"
+                                    content="展示因子值分位数随时间的变化趋势，可以观察因子暴露的周期性和趋势性。适用于判断因子是否处于周期性波动，以及识别极端暴露时期。"
+                                  />
+                                }
+                                variant="borderless"
+                                style={{ marginBottom: '16px' }}
+                              >
+                                <div ref={percentileTimeSeriesRef} className="chart-container" style={{ height: '350px' }}></div>
+                              </Card>
 
-                  <Tabs.TabPane tab="因子贡献度分解" key="attribution">
-                    {!attributionData ? (
-                      <div style={{ textAlign: 'center', padding: '60px 20px', color: '#64748b' }}>
-                        <FundOutlined style={{ fontSize: '48px', marginBottom: '16px' }} />
-                        <p>{loadingAnalysisTabs ? '加载中...' : '请先点击"分析因子"按钮进行因子分析'}</p>
-                      </div>
-                    ) : (
-                      <Row gutter={[16, 16]}>
-                        {/* Alpha-Beta 分解 */}
-                        <Col xs={24} lg={24}>
-                          <Card
-                            title={
-                              <InfoTooltip
-                                title="Alpha-Beta 分析"
-                                content="将收益分解为Alpha（超额收益）和Beta（市场风险暴露）。Alpha衡量因子的选股能力，Beta衡量对市场的敏感度。高Alpha说明因子能够获得超额收益，R²>0.7说明拟合良好。"
-                              />
-                            }
-                            bordered={false}
-                          >
-                            {attributionData.alpha_beta?.error ? (
-                              <div style={{ textAlign: 'center', padding: '20px', color: '#ef4444' }}>
-                                {attributionData.alpha_beta.error}
-                              </div>
-                            ) : attributionData.alpha_beta?.has_benchmark === false ? (
-                              <>
-                                <div style={{ marginBottom: '16px', padding: '12px', background: '#fff7ed', borderRadius: '8px', fontSize: '13px', color: '#c2410c' }}>
-                                  {attributionData.alpha_beta.message || '未提供基准数据'}
-                                </div>
-                                {attributionData.alpha_beta.portfolio_return && (
-                                  <Row gutter={[16, 16]}>
-                                    <Col xs={12} sm={6}>
-                                      <Statistic
-                                        title={
-                                          <InfoTooltip
+                              {/* 历史分布直方图 */}
+                              <Card
+                                title={
+                                  <InfoTooltip
+                                    title="历史分布直方图"
+                                    content="展示因子值的历史频率分布，帮助判断因子是否符合正态分布、是否存在肥尾效应。用于识别极端值和评估因子的统计特性。"
+                                  />
+                                }
+                                variant="borderless"
+                              >
+                                <div ref={exposureHistogramRef} className="chart-container" style={{ height: '350px' }}></div>
+                              </Card>
+                            </>
+                          )}
+                        </>
+                      )
+                    },
+                    {
+                      key: 'effectiveness',
+                      label: '因子有效性',
+                      children: (
+                        <>
+                          {!effectivenessData ? (
+                            <div style={{ textAlign: 'center', padding: '60px 20px', color: '#64748b' }}>
+                              <ExperimentOutlined style={{ fontSize: '48px', marginBottom: '16px' }} />
+                              <p>{loadingAnalysisTabs ? '加载中...' : '请先点击"分析因子"按钮进行因子分析'}</p>
+                            </div>
+                          ) : (
+                            <>
+                              {/* IC统计卡片 */}
+                              <Card className="stats-card" variant="borderless" style={{ marginBottom: '16px' }}>
+                                <Row gutter={[16, 16]}>
+                                  <Col xs={12} sm={6}>
+                                    <Statistic
+                                      title={
+                                        <InfoTooltip
+                                          title="IC均值"
+                                          content="Information Coefficient均值，衡量因子值与未来收益的相关性。IC>0表示因子值越高收益越高，IC<0则相反。绝对值>0.03为有效，>0.05为优秀。"
+                                        />
+                                      }
+                                      value={effectivenessData.ic_time_series?.ic_mean ?? '-'}
+                                      precision={effectivenessData.ic_time_series?.ic_mean !== undefined ? 4 : undefined}
+                                      styles={{
+                                        content: {
+                                          color: (effectivenessData.ic_time_series?.ic_mean || 0) > 0 ? '#ef4444' : '#22c55e',
+                                          fontSize: '20px',
+                                          fontWeight: 'bold'
+                                        }
+                                      }}
+                                    />
+                                  </Col>
+                                  <Col xs={12} sm={6}>
+                                    <Statistic
+                                      title={
+                                        <InfoTooltip
+                                          title="IC标准差"
+                                          content="IC的波动性度量，标准差越小IC越稳定。稳定性是因子有效性的重要指标，低标准差意味着因子在不同时期表现一致。"
+                                        />
+                                      }
+                                      value={effectivenessData.ic_time_series?.ic_std ?? '-'}
+                                      precision={effectivenessData.ic_time_series?.ic_std !== undefined ? 4 : undefined}
+                                    />
+                                  </Col>
+                                  <Col xs={12} sm={6}>
+                                    <Statistic
+                                      title={
+                                        <InfoTooltip
+                                          title="IR比率"
+                                          content="Information Ratio = IC均值/IC标准差，综合衡量因子有效性和稳定性。IR>0.5为良好，>1.0为优秀。IR越高说明因子既有效又稳定。"
+                                        />
+                                      }
+                                      value={effectivenessData.ic_time_series?.ir ?? '-'}
+                                      precision={effectivenessData.ic_time_series?.ir !== undefined ? 4 : undefined}
+                                      styles={{ content: { color: '#22c55e' } }}
+                                    />
+                                  </Col>
+                                  <Col xs={12} sm={6}>
+                                    <Statistic
+                                      title={
+                                        <InfoTooltip
+                                          title="IC>0比例"
+                                          content="IC为正的天数占比，衡量因子胜率。>50%说明因子多数时期有效，>60%为优秀。高胜率意味着因子可靠性更强。"
+                                        />
+                                      }
+                                      value={effectivenessData.ic_time_series?.ic_positive_ratio ?? '-'}
+                                      precision={effectivenessData.ic_time_series?.ic_positive_ratio !== undefined ? 2 : undefined}
+                                      suffix={effectivenessData.ic_time_series?.ic_positive_ratio !== undefined ? '%' : ''}
+                                    />
+                                  </Col>
+                                </Row>
+                              </Card>
+
+                              {/* 因子有效性图表 */}
+                              <Row gutter={[16, 16]}>
+                                <Col xs={24} lg={24}>
+                                  <Card
+                                    title={
+                                      <InfoTooltip
+                                        title="因子-收益散点图"
+                                        content="横轴为因子值，纵轴为未来收益，散点分布反映因子与收益的相关性。若呈现明显向上（下）趋势，说明正（负）相关。点的分布越集中说明相关性越稳定。用于直观判断因子有效性。"
+                                      />
+                                    }
+                                    variant="borderless"
+                                  >
+                                    {effectivenessData.scatter_plot?.error ? (
+                                      <div style={{ textAlign: 'center', padding: '40px', color: '#ef4444' }}>
+                                        {effectivenessData.scatter_plot.error}
+                                      </div>
+                                    ) : (
+                                      <div ref={scatterChartRef} className="chart-container" style={{ height: '400px' }}></div>
+                                    )}
+                                  </Card>
+                                </Col>
+                                <Col xs={24} lg={24}>
+                                  <Card
+                                    title={
+                                      <InfoTooltip
+                                        title="IC时序分析"
+                                        content="展示每日IC值的时间序列，包含IC曲线、零线和±1标准差带。用于识别因子在不同时期的有效性变化，识别失效时期。IC持续在零线以上说明因子稳定有效。"
+                                      />
+                                    }
+                                    variant="borderless"
+                                  >
+                                    {effectivenessData.ic_time_series?.error ? (
+                                      <div style={{ textAlign: 'center', padding: '40px', color: '#ef4444' }}>
+                                        {effectivenessData.ic_time_series.error}
+                                      </div>
+                                    ) : (
+                                      <div ref={icTimeSeriesChartRef} className="chart-container" style={{ height: '400px' }}></div>
+                                    )}
+                                  </Card>
+                                </Col>
+                                <Col xs={24} lg={24}>
+                                  <Card
+                                    title={
+                                      <InfoTooltip
+                                        title="事件响应分析（高/低暴露后收益）"
+                                        content="当因子值突破高/低阈值后N天的累计收益分布。用于识别因子极端暴露的预测能力，红色（高暴露）高于绿色（低暴露）说明因子能够预测未来收益。"
+                                      />
+                                    }
+                                    variant="borderless"
+                                  >
+                                    {effectivenessData.event_response?.error ? (
+                                      <div style={{ textAlign: 'center', padding: '40px', color: '#ef4444' }}>
+                                        {effectivenessData.event_response.error}
+                                      </div>
+                                    ) : (
+                                      <div ref={eventResponseChartRef} className="chart-container" style={{ height: '400px' }}></div>
+                                    )}
+                                  </Card>
+                                </Col>
+                                <Col xs={24} lg={24}>
+                                  <Card
+                                    title={
+                                      <InfoTooltip
+                                        title="因子衰减曲线（IC vs 持有期）"
+                                        content="展示因子预测能力随持有期延长而衰减的曲线。IC随持有期下降越快，说明因子信息越短暂。用于确定最佳持有周期，通常选择IC衰减前的持仓周期。"
+                                      />
+                                    }
+                                    variant="borderless"
+                                  >
+                                    {effectivenessData.decay_analysis?.error ? (
+                                      <div style={{ textAlign: 'center', padding: '40px', color: '#ef4444' }}>
+                                        {effectivenessData.decay_analysis.error}
+                                      </div>
+                                    ) : (
+                                      <div ref={decayCurveChartRef} className="chart-container" style={{ height: '400px' }}></div>
+                                    )}
+                                  </Card>
+                                </Col>
+                              </Row>
+                            </>
+                          )}
+                        </>
+                      )
+                    },
+                    {
+                      key: 'attribution',
+                      label: '因子贡献度分解',
+                      children: (
+                        <>
+                          {!attributionData ? (
+                            <div style={{ textAlign: 'center', padding: '60px 20px', color: '#64748b' }}>
+                              <FundOutlined style={{ fontSize: '48px', marginBottom: '16px' }} />
+                              <p>{loadingAnalysisTabs ? '加载中...' : '请先点击"分析因子"按钮进行因子分析'}</p>
+                            </div>
+                          ) : (
+                            <Row gutter={[16, 16]}>
+                              {/* Alpha-Beta 分解 */}
+                              <Col xs={24} lg={24}>
+                                <Card
+                                  title={
+                                    <InfoTooltip
+                                      title="Alpha-Beta 分析"
+                                      content="将收益分解为Alpha（超额收益）和Beta（市场风险暴露）。Alpha衡量因子的选股能力，Beta衡量对市场的敏感度。高Alpha说明因子能够获得超额收益，R²>0.7说明拟合良好。"
+                                    />
+                                  }
+                                  variant="borderless"
+                                >
+                                  {attributionData.alpha_beta?.error ? (
+                                    <div style={{ textAlign: 'center', padding: '20px', color: '#ef4444' }}>
+                                      {attributionData.alpha_beta.error}
+                                    </div>
+                                  ) : attributionData.alpha_beta?.has_benchmark === false ? (
+                                    <>
+                                      <div style={{ marginBottom: '16px', padding: '12px', background: '#fff7ed', borderRadius: '8px', fontSize: '13px', color: '#c2410c' }}>
+                                        {attributionData.alpha_beta.message || '未提供基准数据'}
+                                      </div>
+                                      {attributionData.alpha_beta.portfolio_return && (
+                                        <Row gutter={[16, 16]}>
+                                          <Col xs={12} sm={6}>
+                                            <Statistic
+                                              title={
+                                                <InfoTooltip
+                                                  title="年化收益"
+                                                  content="投资组合的年化收益率，衡量投资回报水平。正值表示盈利，负值表示亏损。年化收益>10%为良好，>20%为优秀。"
+                                                />
+                                              }
+                                              value={attributionData.alpha_beta.portfolio_return.annual_return ?? '-'}
+                                              precision={4}
+                                              suffix="%"
+                                              styles={{
+                                                content: {
+                                                  color: (attributionData.alpha_beta.portfolio_return.annual_return ?? 0) > 0 ? '#ef4444' : '#22c55e'
+                                                }
+                                              }}
+                                            />
+                                          </Col>
+                                          <Col xs={12} sm={6}>
+                                            <Statistic
+                                              title={
+                                                <InfoTooltip
+                                                  title="年化波动率"
+                                                  content="收益的标准差，衡量投资风险。波动率越大风险越高。一般<15%为低风险，15-30%为中等，>30%为高风险。"
+                                                />
+                                              }
+                                              value={attributionData.alpha_beta.portfolio_return.volatility ?? '-'}
+                                              precision={4}
+                                              suffix="%"
+                                            />
+                                          </Col>
+                                          <Col xs={12} sm={6}>
+                                            <Statistic
+                                              title={
+                                                <InfoTooltip
+                                                  title="夏普比率"
+                                                  content="风险调整后收益指标 = (收益-无风险利率)/波动率。夏普>1为良好，>2为优秀。数值越高说明单位风险的收益越高。"
+                                                />
+                                              }
+                                              value={attributionData.alpha_beta.portfolio_return.sharpe ?? '-'}
+                                              precision={4}
+                                            />
+                                          </Col>
+                                          <Col xs={12} sm={6}>
+                                            <Statistic
+                                              title={
+                                                <InfoTooltip
+                                                  title="日均收益"
+                                                  content="每日平均收益率，反映日常盈利水平。用于评估短期收益能力。"
+                                                />
+                                              }
+                                              value={attributionData.alpha_beta.portfolio_return.daily_mean ?? '-'}
+                                              precision={6}
+                                            />
+                                          </Col>
+                                        </Row>
+                                      )}
+                                    </>
+                                  ) : (
+                                    <>
+                                      <Row gutter={[16, 16]} style={{ marginBottom: '16px' }}>
+                                        <Col xs={12} sm={6}>
+                                          <Statistic
+                                            title={
+                                              <InfoTooltip
+                                                title="年化 Alpha"
+                                                content="超额收益，衡量因子超越市场的能力。Alpha>0说明因子能获得超额收益，>5%为优秀，<0说明跑输市场。"
+                                              />
+                                            }
+                                            value={attributionData.alpha_beta?.alpha ?? '-'}
+                                            precision={4}
+                                            suffix="%"
+                                            styles={{
+                                              content: {
+                                                color: (attributionData.alpha_beta?.alpha ?? 0) > 0 ? '#ef4444' : '#22c55e'
+                                              }
+                                            }}
+                                          />
+                                        </Col>
+                                        <Col xs={12} sm={6}>
+                                          <Statistic
+                                            title={
+                                              <InfoTooltip
+                                                title="Beta"
+                                                content="市场风险暴露，衡量因子对市场的敏感度。Beta=1表示与市场同步，>1表示高弹性（涨跌幅大于市场），<1表示低弹性。"
+                                              />
+                                            }
+                                            value={attributionData.alpha_beta?.beta ?? '-'}
+                                            precision={4}
+                                          />
+                                        </Col>
+                                        <Col xs={12} sm={6}>
+                                          <Statistic
+                                            title={
+                                              <InfoTooltip
+                                                title="拟合度 (R²)"
+                                                content="模型解释力，0-1之间，越接近1说明市场风险对收益解释越强。R²>0.7为良好拟合，>0.9为优秀拟合。"
+                                              />
+                                            }
+                                            value={attributionData.alpha_beta?.r_squared ?? '-'}
+                                            precision={4}
+                                          />
+                                        </Col>
+                                        <Col xs={12} sm={6}>
+                                          <Statistic
+                                            title={
+                                              <InfoTooltip
+                                                title="日均 Alpha"
+                                                content="每日平均超额收益，反映日常超越市场的能力。用于评估短期超额收益稳定性。"
+                                              />
+                                            }
+                                            value={attributionData.alpha_beta?.daily_alpha ?? '-'}
+                                            precision={6}
+                                          />
+                                        </Col>
+                                      </Row>
+                                      {attributionData.alpha_beta?.interpretation && (
+                                        <div style={{ marginTop: '16px', padding: '12px', background: '#f8fafc', borderRadius: '8px', fontSize: '13px', color: '#475569' }}>
+                                          {attributionData.alpha_beta.interpretation}
+                                        </div>
+                                      )}
+                                    </>
+                                  )}
+                                </Card>
+                              </Col>
+
+                              {/* 收益分解 */}
+                              <Col xs={24} lg={24}>
+                                <Card
+                                  title={
+                                    <InfoTooltip
+                                      title="收益分解"
+                                      content="将总收益分解为因子收益和残差收益，展示因子的贡献度。因子收益越高说明因子对总收益贡献越大，残差收益是未被因子解释的部分。"
+                                    />
+                                  }
+                                  variant="borderless"
+                                >
+                                  {attributionData.return_decomposition?.error ? (
+                                    <div style={{ textAlign: 'center', padding: '20px', color: '#ef4444' }}>
+                                      {attributionData.return_decomposition.error}
+                                    </div>
+                                  ) : attributionData.return_decomposition?.overall_stats ? (
+                                    <>
+                                      <Row gutter={[16, 16]} style={{ marginBottom: '16px' }}>
+                                        <Col xs={12} sm={6}>
+                                          <Statistic
                                             title="年化收益"
-                                            content="投资组合的年化收益率，衡量投资回报水平。正值表示盈利，负值表示亏损。年化收益>10%为良好，>20%为优秀。"
+                                            value={attributionData.return_decomposition.overall_stats.annual_return ?? '-'}
+                                            precision={4}
+                                            suffix="%"
+                                            styles={{
+                                              content: {
+                                                color: (attributionData.return_decomposition.overall_stats.annual_return ?? 0) > 0 ? '#ef4444' : '#22c55e'
+                                              }
+                                            }}
                                           />
-                                        }
-                                        value={attributionData.alpha_beta.portfolio_return.annual_return ?? '-'}
-                                        precision={4}
-                                        suffix="%"
-                                        valueStyle={{
-                                          color: (attributionData.alpha_beta.portfolio_return.annual_return ?? 0) > 0 ? '#ef4444' : '#22c55e'
-                                        }}
-                                      />
-                                    </Col>
-                                    <Col xs={12} sm={6}>
-                                      <Statistic
-                                        title={
-                                          <InfoTooltip
+                                        </Col>
+                                        <Col xs={12} sm={6}>
+                                          <Statistic
+                                            title="累计收益"
+                                            value={attributionData.return_decomposition.overall_stats.cumulative_return ?? '-'}
+                                            precision={4}
+                                            suffix="%"
+                                            styles={{
+                                              content: {
+                                                color: (attributionData.return_decomposition.overall_stats.cumulative_return ?? 0) > 0 ? '#ef4444' : '#22c55e'
+                                              }
+                                            }}
+                                          />
+                                        </Col>
+                                        <Col xs={12} sm={6}>
+                                          <Statistic
                                             title="年化波动率"
-                                            content="收益的标准差，衡量投资风险。波动率越大风险越高。一般<15%为低风险，15-30%为中等，>30%为高风险。"
+                                            value={attributionData.return_decomposition.overall_stats.volatility_annual ?? '-'}
+                                            precision={4}
+                                            suffix="%"
                                           />
-                                        }
-                                        value={attributionData.alpha_beta.portfolio_return.volatility ?? '-'}
-                                        precision={4}
-                                        suffix="%"
-                                      />
-                                    </Col>
-                                    <Col xs={12} sm={6}>
-                                      <Statistic
-                                        title={
-                                          <InfoTooltip
+                                        </Col>
+                                        <Col xs={12} sm={6}>
+                                          <Statistic
                                             title="夏普比率"
-                                            content="风险调整后收益指标 = (收益-无风险利率)/波动率。夏普>1为良好，>2为优秀。数值越高说明单位风险的收益越高。"
+                                            value={attributionData.return_decomposition.overall_stats.sharpe_ratio ?? '-'}
+                                            precision={4}
                                           />
-                                        }
-                                        value={attributionData.alpha_beta.portfolio_return.sharpe ?? '-'}
-                                        precision={4}
-                                      />
-                                    </Col>
-                                    <Col xs={12} sm={6}>
-                                      <Statistic
-                                        title={
-                                          <InfoTooltip
+                                        </Col>
+                                      </Row>
+                                      <Row gutter={[16, 16]}>
+                                        <Col xs={12} sm={6}>
+                                          <Statistic
                                             title="日均收益"
-                                            content="每日平均收益率，反映日常盈利水平。用于评估短期收益能力。"
+                                            value={attributionData.return_decomposition.overall_stats.avg_daily_return ?? '-'}
+                                            precision={6}
                                           />
-                                        }
-                                        value={attributionData.alpha_beta.portfolio_return.daily_mean ?? '-'}
-                                        precision={6}
-                                      />
-                                    </Col>
-                                  </Row>
-                                )}
-                              </>
-                            ) : (
-                              <>
-                                <Row gutter={[16, 16]} style={{ marginBottom: '16px' }}>
-                                  <Col xs={12} sm={6}>
-                                    <Statistic
-                                      title={
-                                        <InfoTooltip
-                                          title="年化 Alpha"
-                                          content="超额收益，衡量因子超越市场的能力。Alpha>0说明因子能获得超额收益，>5%为优秀，<0说明跑输市场。"
-                                        />
-                                      }
-                                      value={attributionData.alpha_beta?.alpha ?? '-'}
-                                      precision={4}
-                                      suffix="%"
-                                      valueStyle={{
-                                        color: (attributionData.alpha_beta?.alpha ?? 0) > 0 ? '#ef4444' : '#22c55e'
-                                      }}
-                                    />
-                                  </Col>
-                                  <Col xs={12} sm={6}>
-                                    <Statistic
-                                      title={
-                                        <InfoTooltip
-                                          title="Beta"
-                                          content="市场风险暴露，衡量因子对市场的敏感度。Beta=1表示与市场同步，>1表示高弹性（涨跌幅大于市场），<1表示低弹性。"
-                                        />
-                                      }
-                                      value={attributionData.alpha_beta?.beta ?? '-'}
-                                      precision={4}
-                                    />
-                                  </Col>
-                                  <Col xs={12} sm={6}>
-                                    <Statistic
-                                      title={
-                                        <InfoTooltip
-                                          title="拟合度 (R²)"
-                                          content="模型解释力，0-1之间，越接近1说明市场风险对收益解释越强。R²>0.7为良好拟合，>0.9为优秀拟合。"
-                                        />
-                                      }
-                                      value={attributionData.alpha_beta?.r_squared ?? '-'}
-                                      precision={4}
-                                    />
-                                  </Col>
-                                  <Col xs={12} sm={6}>
-                                    <Statistic
-                                      title={
-                                        <InfoTooltip
-                                          title="日均 Alpha"
-                                          content="每日平均超额收益，反映日常超越市场的能力。用于评估短期超额收益稳定性。"
-                                        />
-                                      }
-                                      value={attributionData.alpha_beta?.daily_alpha ?? '-'}
-                                      precision={6}
-                                    />
-                                  </Col>
-                                </Row>
-                                {attributionData.alpha_beta?.interpretation && (
-                                  <div style={{ marginTop: '16px', padding: '12px', background: '#f8fafc', borderRadius: '8px', fontSize: '13px', color: '#475569' }}>
-                                    {attributionData.alpha_beta.interpretation}
-                                  </div>
-                                )}
-                              </>
-                            )}
-                          </Card>
-                        </Col>
-
-                        {/* 收益分解 */}
-                        <Col xs={24} lg={24}>
-                          <Card
-                            title={
-                              <InfoTooltip
-                                title="收益分解"
-                                content="将总收益分解为因子收益和残差收益，展示因子的贡献度。因子收益越高说明因子对总收益贡献越大，残差收益是未被因子解释的部分。"
-                              />
-                            }
-                            bordered={false}
-                          >
-                            {attributionData.return_decomposition?.error ? (
-                              <div style={{ textAlign: 'center', padding: '20px', color: '#ef4444' }}>
-                                {attributionData.return_decomposition.error}
-                              </div>
-                            ) : attributionData.return_decomposition?.overall_stats ? (
-                              <>
-                                <Row gutter={[16, 16]} style={{ marginBottom: '16px' }}>
-                                  <Col xs={12} sm={6}>
-                                    <Statistic
-                                      title="年化收益"
-                                      value={attributionData.return_decomposition.overall_stats.annual_return ?? '-'}
-                                      precision={4}
-                                      suffix="%"
-                                      valueStyle={{
-                                        color: (attributionData.return_decomposition.overall_stats.annual_return ?? 0) > 0 ? '#ef4444' : '#22c55e'
-                                      }}
-                                    />
-                                  </Col>
-                                  <Col xs={12} sm={6}>
-                                    <Statistic
-                                      title="累计收益"
-                                      value={attributionData.return_decomposition.overall_stats.cumulative_return ?? '-'}
-                                      precision={4}
-                                      suffix="%"
-                                      valueStyle={{
-                                        color: (attributionData.return_decomposition.overall_stats.cumulative_return ?? 0) > 0 ? '#ef4444' : '#22c55e'
-                                      }}
-                                    />
-                                  </Col>
-                                  <Col xs={12} sm={6}>
-                                    <Statistic
-                                      title="年化波动率"
-                                      value={attributionData.return_decomposition.overall_stats.volatility_annual ?? '-'}
-                                      precision={4}
-                                      suffix="%"
-                                    />
-                                  </Col>
-                                  <Col xs={12} sm={6}>
-                                    <Statistic
-                                      title="夏普比率"
-                                      value={attributionData.return_decomposition.overall_stats.sharpe_ratio ?? '-'}
-                                      precision={4}
-                                    />
-                                  </Col>
-                                </Row>
-                                <Row gutter={[16, 16]}>
-                                  <Col xs={12} sm={6}>
-                                    <Statistic
-                                      title="日均收益"
-                                      value={attributionData.return_decomposition.overall_stats.avg_daily_return ?? '-'}
-                                      precision={6}
-                                    />
-                                  </Col>
-                                  <Col xs={12} sm={6}>
-                                    <Statistic
-                                      title="日均波动率"
-                                      value={attributionData.return_decomposition.overall_stats.daily_volatility ?? '-'}
-                                      precision={6}
-                                    />
-                                  </Col>
-                                  <Col xs={12} sm={6}>
-                                    <Statistic
-                                      title="胜率"
-                                      value={attributionData.return_decomposition.overall_stats.win_rate ?? '-'}
-                                      precision={2}
-                                      suffix="%"
-                                    />
-                                  </Col>
-                                  <Col xs={12} sm={6}>
-                                    <Statistic
-                                      title="股票数量"
-                                      value={attributionData.return_decomposition.stock_count ?? '-'}
-                                    />
-                                  </Col>
-                                </Row>
-                              </>
-                            ) : (
-                              <div style={{ textAlign: 'center', padding: '20px', color: '#64748b' }}>
-                                暂无数据
-                              </div>
-                            )}
-                          </Card>
-                        </Col>
-
-                        {/* 因子收益贡献 */}
-                        <Col xs={24} lg={24}>
-                          <Card title="因子收益贡献" bordered={false}>
-                            {attributionData.factor_contribution?.error ? (
-                              <div style={{ textAlign: 'center', padding: '20px', color: '#ef4444' }}>
-                                {attributionData.factor_contribution.error}
-                              </div>
-                            ) : attributionData.factor_contribution?.ic !== undefined ? (
-                              <>
-                                <Row gutter={[16, 16]} style={{ marginBottom: '16px' }}>
-                                  <Col xs={12} sm={6}>
-                                    <Statistic
-                                      title="IC (信息系数)"
-                                      value={attributionData.factor_contribution.ic ?? '-'}
-                                      precision={4}
-                                      valueStyle={{
-                                        color: (attributionData.factor_contribution.ic ?? 0) > 0 ? '#ef4444' : '#22c55e'
-                                      }}
-                                    />
-                                  </Col>
-                                  <Col xs={12} sm={6}>
-                                    <Statistic
-                                      title="IC P值"
-                                      value={attributionData.factor_contribution.ic_pvalue ?? '-'}
-                                      precision={4}
-                                    />
-                                  </Col>
-                                  <Col xs={12} sm={6}>
-                                    <Statistic
-                                      title="高暴露组收益"
-                                      value={attributionData.factor_contribution.high_exposure_return ?? '-'}
-                                      precision={6}
-                                      suffix="%"
-                                    />
-                                  </Col>
-                                  <Col xs={12} sm={6}>
-                                    <Statistic
-                                      title="低暴露组收益"
-                                      value={attributionData.factor_contribution.low_exposure_return ?? '-'}
-                                      precision={6}
-                                      suffix="%"
-                                    />
-                                  </Col>
-                                </Row>
-                                <Row gutter={[16, 16]}>
-                                  <Col xs={12} sm={6}>
-                                    <Statistic
-                                      title="多空收益"
-                                      value={attributionData.factor_contribution.long_short_return ?? '-'}
-                                      precision={6}
-                                      suffix="%"
-                                      valueStyle={{
-                                        color: (attributionData.factor_contribution.long_short_return ?? 0) > 0 ? '#ef4444' : '#22c55e'
-                                      }}
-                                    />
-                                  </Col>
-                                  <Col xs={12} sm={6}>
-                                    <Statistic
-                                      title="因子贡献比例"
-                                      value={attributionData.factor_contribution.contribution_ratio ?? '-'}
-                                      precision={4}
-                                      suffix="%"
-                                      formatter={(value) => `${((Number(value) || 0) * 100).toFixed(2)}%`}
-                                    />
-                                  </Col>
-                                  <Col xs={12} sm={6}>
-                                    <Statistic
-                                      title="样本数量"
-                                      value={attributionData.factor_contribution.sample_size ?? '-'}
-                                    />
-                                  </Col>
-                                </Row>
-                              </>
-                            ) : (
-                              <div style={{ textAlign: 'center', padding: '20px', color: '#64748b' }}>
-                                暂无数据
-                              </div>
-                            )}
-                          </Card>
-                        </Col>
-                      </Row>
-                    )}
-                  </Tabs.TabPane>
-
-                  <Tabs.TabPane tab="时间序列动态监测" key="monitoring">
-                    {!monitoringData ? (
-                      <div style={{ textAlign: 'center', padding: '60px 20px', color: '#64748b' }}>
-                        <LineChartOutlined style={{ fontSize: '48px', marginBottom: '16px' }} />
-                        <p>{loadingAnalysisTabs ? '加载中...' : '请先点击"分析因子"按钮进行因子分析'}</p>
-                      </div>
-                    ) : (
-                      <Row gutter={[16, 16]}>
-                        {/* 滚动窗口带状图 */}
-                        <Col xs={24} lg={24}>
-                          <Card
-                            title={
-                              <InfoTooltip
-                                title="滚动窗口图（均值 ± 2倍标准差）"
-                                content="展示因子值、滚动均值和置信区间（均值±2倍标准差）。用于识别异常值（超出置信区间）和判断因子稳定性。置信区间窄说明因子波动小，宽说明波动大。"
-                              />
-                            }
-                            bordered={false}
-                          >
-                            {monitoringData.rolling_chart?.error ? (
-                              <div style={{ textAlign: 'center', padding: '20px', color: '#ef4444' }}>
-                                {monitoringData.rolling_chart.error}
-                              </div>
-                            ) : (
-                              <div ref={rollingBandChartRef} className="chart-container" style={{ height: '350px' }}></div>
-                            )}
-                          </Card>
-                        </Col>
-
-                        {/* 暴露度转移矩阵 */}
-                        <Col xs={24} lg={24}>
-                          <Card
-                            title={
-                              <InfoTooltip
-                                title="暴露度转移矩阵（马尔可夫转移概率）"
-                                content="展示因子暴露状态（低/中/高）之间的转移概率，颜色越深表示转移概率越高。用于预测因子未来状态，判断因子的持续性。对角线元素高说明状态稳定。"
-                              />
-                            }
-                            bordered={false}
-                          >
-                            {monitoringData.transition_matrix?.error ? (
-                              <div style={{ textAlign: 'center', padding: '20px', color: '#ef4444' }}>
-                                {monitoringData.transition_matrix.error}
-                              </div>
-                            ) : (
-                              <div ref={transitionMatrixRef} className="chart-container" style={{ height: '350px' }}></div>
-                            )}
-                          </Card>
-                        </Col>
-
-                        {/* 结构断点检测 */}
-                        <Col xs={24} lg={24}>
-                          <Card
-                            title={
-                              <InfoTooltip
-                                title="结构性断点检测"
-                                content="识别因子序列中的结构性变化点（统计显著的位置）。用于发现市场制度变化、因子失效时期。断点越多说明因子稳定性越差，需谨慎使用。"
-                              />
-                            }
-                            bordered={false}
-                          >
-                            {monitoringData.structural_break?.error ? (
-                              <div style={{ textAlign: 'center', padding: '20px', color: '#ef4444' }}>
-                                {monitoringData.structural_break.error}
-                              </div>
-                            ) : (
-                              <>
-                                <div ref={structuralBreakChartRef} className="chart-container" style={{ height: '280px' }}></div>
-                                <div style={{ marginTop: '12px', padding: '12px', background: '#f8fafc', borderRadius: '8px' }}>
-                                  <div style={{ fontSize: '13px', color: '#475569', marginBottom: '4px' }}>
-                                    <strong>检测方法:</strong> {monitoringData.structural_break?.method || '-'}
-                                  </div>
-                                  <div style={{ fontSize: '13px', color: '#475569', marginBottom: '4px' }}>
-                                    <strong>断点数量:</strong> {monitoringData.structural_break?.num_breaks ?? 0}
-                                  </div>
-                                  <div style={{ fontSize: '13px', color: '#475569' }}>
-                                    {monitoringData.structural_break?.interpretation || '-'}
-                                  </div>
-                                </div>
-                              </>
-                            )}
-                          </Card>
-                        </Col>
-
-                        {/* 周期性分析 */}
-                        <Col xs={24} lg={24}>
-                          <Card
-                            title={
-                              <InfoTooltip
-                                title="周期性分析（FFT 傅里叶变换）"
-                                content="通过傅里叶变换识别因子序列中的周期成分。横轴为周期（天数），纵轴为功率（强度）。用于发现因子的季节性规律，如月度效应、季度效应等。峰值越突出说明周期性越明显。"
-                              />
-                            }
-                            bordered={false}
-                          >
-                            {monitoringData.seasonality?.error ? (
-                              <div style={{ textAlign: 'center', padding: '20px', color: '#ef4444' }}>
-                                {monitoringData.seasonality.error}
-                              </div>
-                            ) : (
-                              <>
-                                <div ref={seasonalityChartRef} className="chart-container" style={{ height: '300px' }}></div>
-                                {monitoringData.seasonality?.dominant_periods && monitoringData.seasonality.dominant_periods.length > 0 && (
-                                  <div style={{ marginTop: '12px' }}>
-                                    <div style={{ fontSize: '13px', fontWeight: 500, marginBottom: '8px', color: '#0f172a' }}>
-                                      主要周期成分:
+                                        </Col>
+                                        <Col xs={12} sm={6}>
+                                          <Statistic
+                                            title="日均波动率"
+                                            value={attributionData.return_decomposition.overall_stats.daily_volatility ?? '-'}
+                                            precision={6}
+                                          />
+                                        </Col>
+                                        <Col xs={12} sm={6}>
+                                          <Statistic
+                                            title="胜率"
+                                            value={attributionData.return_decomposition.overall_stats.win_rate ?? '-'}
+                                            precision={2}
+                                            suffix="%"
+                                          />
+                                        </Col>
+                                        <Col xs={12} sm={6}>
+                                          <Statistic
+                                            title="股票数量"
+                                            value={attributionData.return_decomposition.stock_count ?? '-'}
+                                          />
+                                        </Col>
+                                      </Row>
+                                    </>
+                                  ) : (
+                                    <div style={{ textAlign: 'center', padding: '20px', color: '#64748b' }}>
+                                      暂无数据
                                     </div>
-                                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
-                                      {monitoringData.seasonality.dominant_periods.slice(0, 5).map((period: any, idx: number) => (
-                                        <Tag key={idx} color="blue" style={{ fontSize: '12px' }}>
-                                          {period.period_days?.toFixed(1)} 天 (功率: {period.power?.toFixed(2)})
-                                        </Tag>
-                                      ))}
+                                  )}
+                                </Card>
+                              </Col>
+
+                              {/* 因子收益贡献 */}
+                              <Col xs={24} lg={24}>
+                                <Card title="因子收益贡献" variant="borderless">
+                                  {attributionData.factor_contribution?.error ? (
+                                    <div style={{ textAlign: 'center', padding: '20px', color: '#ef4444' }}>
+                                      {attributionData.factor_contribution.error}
                                     </div>
-                                  </div>
-                                )}
-                              </>
-                            )}
-                          </Card>
-                        </Col>
-                      </Row>
-                    )}
-                  </Tabs.TabPane>
-                </Tabs>
+                                  ) : attributionData.factor_contribution?.ic !== undefined ? (
+                                    <>
+                                      <Row gutter={[16, 16]} style={{ marginBottom: '16px' }}>
+                                        <Col xs={12} sm={6}>
+                                          <Statistic
+                                            title="IC (信息系数)"
+                                            value={attributionData.factor_contribution.ic ?? '-'}
+                                            precision={4}
+                                            styles={{
+                                              content: {
+                                                color: (attributionData.factor_contribution.ic ?? 0) > 0 ? '#ef4444' : '#22c55e'
+                                              }
+                                            }}
+                                          />
+                                        </Col>
+                                        <Col xs={12} sm={6}>
+                                          <Statistic
+                                            title="IC P值"
+                                            value={attributionData.factor_contribution.ic_pvalue ?? '-'}
+                                            precision={4}
+                                          />
+                                        </Col>
+                                        <Col xs={12} sm={6}>
+                                          <Statistic
+                                            title="高暴露组收益"
+                                            value={attributionData.factor_contribution.high_exposure_return ?? '-'}
+                                            precision={6}
+                                            suffix="%"
+                                          />
+                                        </Col>
+                                        <Col xs={12} sm={6}>
+                                          <Statistic
+                                            title="低暴露组收益"
+                                            value={attributionData.factor_contribution.low_exposure_return ?? '-'}
+                                            precision={6}
+                                            suffix="%"
+                                          />
+                                        </Col>
+                                      </Row>
+                                      <Row gutter={[16, 16]}>
+                                        <Col xs={12} sm={6}>
+                                          <Statistic
+                                            title="多空收益"
+                                            value={attributionData.factor_contribution.long_short_return ?? '-'}
+                                            precision={6}
+                                            suffix="%"
+                                            styles={{
+                                              content: {
+                                                color: (attributionData.factor_contribution.long_short_return ?? 0) > 0 ? '#ef4444' : '#22c55e'
+                                              }
+                                            }}
+                                          />
+                                        </Col>
+                                        <Col xs={12} sm={6}>
+                                          <Statistic
+                                            title="因子贡献比例"
+                                            value={attributionData.factor_contribution.contribution_ratio ?? '-'}
+                                            precision={4}
+                                            suffix="%"
+                                            formatter={(value) => `${((Number(value) || 0) * 100).toFixed(2)}%`}
+                                          />
+                                        </Col>
+                                        <Col xs={12} sm={6}>
+                                          <Statistic
+                                            title="样本数量"
+                                            value={attributionData.factor_contribution.sample_size ?? '-'}
+                                          />
+                                        </Col>
+                                      </Row>
+                                    </>
+                                  ) : (
+                                    <div style={{ textAlign: 'center', padding: '20px', color: '#64748b' }}>
+                                      暂无数据
+                                    </div>
+                                  )}
+                                </Card>
+                              </Col>
+                            </Row>
+                          )}
+                        </>
+                      )
+                    },
+                    {
+                      key: 'monitoring',
+                      label: '时间序列动态监测',
+                      children: (
+                        <>
+                          {!monitoringData ? (
+                            <div style={{ textAlign: 'center', padding: '60px 20px', color: '#64748b' }}>
+                              <LineChartOutlined style={{ fontSize: '48px', marginBottom: '16px' }} />
+                              <p>{loadingAnalysisTabs ? '加载中...' : '请先点击"分析因子"按钮进行因子分析'}</p>
+                            </div>
+                          ) : (
+                            <Row gutter={[16, 16]}>
+                              {/* 滚动窗口带状图 */}
+                              <Col xs={24} lg={24}>
+                                <Card
+                                  title={
+                                    <InfoTooltip
+                                      title="滚动窗口图（均值 ± 2倍标准差）"
+                                      content="展示因子值、滚动均值和置信区间（均值±2倍标准差）。用于识别异常值（超出置信区间）和判断因子稳定性。置信区间窄说明因子波动小，宽说明波动大。"
+                                    />
+                                  }
+                                  variant="borderless"
+                                >
+                                  {monitoringData.rolling_chart?.error ? (
+                                    <div style={{ textAlign: 'center', padding: '20px', color: '#ef4444' }}>
+                                      {monitoringData.rolling_chart.error}
+                                    </div>
+                                  ) : (
+                                    <div ref={rollingBandChartRef} className="chart-container" style={{ height: '350px' }}></div>
+                                  )}
+                                </Card>
+                              </Col>
+
+                              {/* 暴露度转移矩阵 */}
+                              <Col xs={24} lg={24}>
+                                <Card
+                                  title={
+                                    <InfoTooltip
+                                      title="暴露度转移矩阵（马尔可夫转移概率）"
+                                      content="展示因子暴露状态（低/中/高）之间的转移概率，颜色越深表示转移概率越高。用于预测因子未来状态，判断因子的持续性。对角线元素高说明状态稳定。"
+                                    />
+                                  }
+                                  variant="borderless"
+                                >
+                                  {monitoringData.transition_matrix?.error ? (
+                                    <div style={{ textAlign: 'center', padding: '20px', color: '#ef4444' }}>
+                                      {monitoringData.transition_matrix.error}
+                                    </div>
+                                  ) : (
+                                    <div ref={transitionMatrixRef} className="chart-container" style={{ height: '350px' }}></div>
+                                  )}
+                                </Card>
+                              </Col>
+
+                              {/* 结构断点检测 */}
+                              <Col xs={24} lg={24}>
+                                <Card
+                                  title={
+                                    <InfoTooltip
+                                      title="结构性断点检测"
+                                      content="识别因子序列中的结构性变化点（统计显著的位置）。用于发现市场制度变化、因子失效时期。断点越多说明因子稳定性越差，需谨慎使用。"
+                                    />
+                                  }
+                                  variant="borderless"
+                                >
+                                  {monitoringData.structural_break?.error ? (
+                                    <div style={{ textAlign: 'center', padding: '20px', color: '#ef4444' }}>
+                                      {monitoringData.structural_break.error}
+                                    </div>
+                                  ) : (
+                                    <>
+                                      <div ref={structuralBreakChartRef} className="chart-container" style={{ height: '280px' }}></div>
+                                      <div style={{ marginTop: '12px', padding: '12px', background: '#f8fafc', borderRadius: '8px' }}>
+                                        <div style={{ fontSize: '13px', color: '#475569', marginBottom: '4px' }}>
+                                          <strong>检测方法:</strong> {monitoringData.structural_break?.method || '-'}
+                                        </div>
+                                        <div style={{ fontSize: '13px', color: '#475569', marginBottom: '4px' }}>
+                                          <strong>断点数量:</strong> {monitoringData.structural_break?.num_breaks ?? 0}
+                                        </div>
+                                        <div style={{ fontSize: '13px', color: '#475569' }}>
+                                          {monitoringData.structural_break?.interpretation || '-'}
+                                        </div>
+                                      </div>
+                                    </>
+                                  )}
+                                </Card>
+                              </Col>
+
+                              {/* 周期性分析 */}
+                              <Col xs={24} lg={24}>
+                                <Card
+                                  title={
+                                    <InfoTooltip
+                                      title="周期性分析（FFT 傅里叶变换）"
+                                      content="通过傅里叶变换识别因子序列中的周期成分。横轴为周期（天数），纵轴为功率（强度）。用于发现因子的季节性规律，如月度效应、季度效应等。峰值越突出说明周期性越明显。"
+                                    />
+                                  }
+                                  variant="borderless"
+                                >
+                                  {monitoringData.seasonality?.error ? (
+                                    <div style={{ textAlign: 'center', padding: '20px', color: '#ef4444' }}>
+                                      {monitoringData.seasonality.error}
+                                    </div>
+                                  ) : (
+                                    <>
+                                      <div ref={seasonalityChartRef} className="chart-container" style={{ height: '300px' }}></div>
+                                      {monitoringData.seasonality?.dominant_periods && monitoringData.seasonality.dominant_periods.length > 0 && (
+                                        <div style={{ marginTop: '12px' }}>
+                                          <div style={{ fontSize: '13px', fontWeight: 500, marginBottom: '8px', color: '#0f172a' }}>
+                                            主要周期成分:
+                                          </div>
+                                          <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
+                                            {monitoringData.seasonality.dominant_periods.slice(0, 5).map((period: any, idx: number) => (
+                                              <Tag key={idx} color="blue" style={{ fontSize: '12px' }}>
+                                                {period.period_days?.toFixed(1)} 天 (功率: {period.power?.toFixed(2)})
+                                              </Tag>
+                                            ))}
+                                          </div>
+                                        </div>
+                                      )}
+                                    </>
+                                  )}
+                                </Card>
+                              </Col>
+                            </Row>
+                          )}
+                        </>
+                      )
+                    }
+                  ]}
+                />
               </Card>
             </Col>
           </>
@@ -3200,7 +3358,7 @@ const FactorDetail: React.FC = () => {
         onCancel={handleCancelEdit}
         footer={null}
         width={600}
-        destroyOnClose
+        destroyOnHidden
       >
         <Form layout="vertical">
           <Form.Item
@@ -3259,15 +3417,21 @@ const FactorDetail: React.FC = () => {
           </Form.Item>
 
           <Form.Item
-            label="因子代码"
+            label={
+              <Space>
+                <span>因子代码</span>
+                <Tooltip title={getFormulaHelpContent(editForm.formula_type || 'expression')} placement="right" styles={{ root: { maxWidth: '600px' } }}>
+                  <QuestionCircleOutlined style={{ color: '#1890ff', cursor: 'help' }} />
+                </Tooltip>
+              </Space>
+            }
             required
             style={{ marginBottom: 16 }}
-            extra="支持 Python 表达式，可使用 close, open, high, low, volume 等字段"
           >
             <Input.TextArea
               value={editForm.code}
               onChange={(e) => setEditForm({ ...editForm, code: e.target.value })}
-              placeholder="例如：RSI(close, 14)"
+              placeholder={editForm.formula_type === 'expression' ? '例如：close.rolling(20).mean()' : '例如：def calculate_factor(df):\n    return df["close"].rolling(20).mean()'}
               rows={6}
               className="font-mono"
               style={{
