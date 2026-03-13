@@ -279,12 +279,11 @@ async def validate_factor(request: dict):
 
         # 字符检查：确保只包含合法字符
         import re
-        # 允许更多合法字符，包括函数形式的因子代码中常见的字符
-        # 允许：字母、数字、下划线、运算符、比较符、括号、空格、引号、反斜杠、换行、制表符等
-        if not re.match(r'^[a-zA-Z0-9_\+\-\*\/\(\)\.\s,\[\]:<>=!&|\'"\\\n\t%;?]+$', code):
+        # 使用更宽松的检查：只禁止控制字符，允许所有可打印字符（包括中文）
+        if re.search(r'[\x00-\x08\x0B\x0C\x0E-\x1F]', code):
             return {
                 "success": False,
-                "message": "代码包含非法字符"
+                "message": "代码包含非法控制字符"
             }
 
         # 调用真正的验证逻辑：执行代码来测试
@@ -310,3 +309,61 @@ async def validate_factor(request: dict):
             "success": False,
             "message": str(e)
         }
+
+
+@router.post("/{factor_id}/copy")
+async def copy_factor(factor_id: int):
+    """复制因子"""
+    try:
+        # 获取原因子信息
+        factors = factor_service.get_all_factors()
+        original_factor = next((f for f in factors if f.get("id") == factor_id), None)
+
+        if not original_factor:
+            raise HTTPException(status_code=404, detail="因子不存在")
+
+        # 生成新的因子名称（名称_数字）
+        base_name = original_factor.get("name", "")
+        new_name = base_name
+
+        # 查找已存在的同名副本数量
+        existing_copies = [
+            f for f in factors
+            if f.get("source") == "user" and f.get("name", "").startswith(base_name + "_")
+        ]
+
+        # 提取已有的数字后缀
+        suffix_numbers = []
+        for f in existing_copies:
+            name = f.get("name", "")
+            if name.startswith(base_name + "_"):
+                suffix = name[len(base_name) + 1:]
+                if suffix.isdigit():
+                    suffix_numbers.append(int(suffix))
+
+        # 生成新的数字后缀
+        if suffix_numbers:
+            new_suffix = max(suffix_numbers) + 1
+        else:
+            new_suffix = 1
+
+        new_name = f"{base_name}_{new_suffix}"
+
+        # 创建新因子（作为用户自定义因子）
+        new_factor = factor_service.create_factor(
+            name=new_name,
+            code=original_factor.get("code", ""),
+            category=original_factor.get("category", ""),
+            description=original_factor.get("description", ""),
+            formula_type=original_factor.get("formula_type", "expression")
+        )
+
+        return {
+            "success": True,
+            "data": new_factor,
+            "message": f"因子已复制为 {new_name}"
+        }
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))

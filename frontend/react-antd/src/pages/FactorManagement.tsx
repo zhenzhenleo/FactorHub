@@ -24,7 +24,8 @@ import {
   SearchOutlined,
   DeleteOutlined,
   EyeOutlined,
-  CheckOutlined
+  CheckOutlined,
+  CopyOutlined
 } from '@ant-design/icons'
 import { api } from '@/services/api'
 import './FactorManagement.css'
@@ -183,6 +184,21 @@ const FactorManagement: React.FC = () => {
     })
   }
 
+  // 复制因子
+  const handleCopyFactor = async (id: number, name: string) => {
+    try {
+      const response = await api.copyFactor(id) as any
+      if (response.success) {
+        message.success(`因子已复制为 "${response.data.name}"`)
+        loadFactors()
+      } else {
+        message.error(response.message || '复制失败')
+      }
+    } catch (error) {
+      message.error('复制失败')
+    }
+  }
+
   // 批量生成因子
   const handleBatchGenerate = async (values: any) => {
     const { base_factors, methods, ic_threshold, ir_threshold, min_valid_ratio } = values
@@ -263,7 +279,7 @@ const FactorManagement: React.FC = () => {
     {
       title: '操作',
       key: 'action',
-      width: 150,
+      width: 200,
       fixed: 'right',
       render: (_: any, record: Factor) => (
         <Space size="small">
@@ -274,6 +290,14 @@ const FactorManagement: React.FC = () => {
             onClick={() => navigate(`/factor-detail?id=${record.id}`)}
           >
             查看
+          </Button>
+          <Button
+            type="link"
+            size="small"
+            icon={<CopyOutlined />}
+            onClick={() => handleCopyFactor(record.id, record.name)}
+          >
+            复制
           </Button>
           {record.source === 'user' && (
             <Button

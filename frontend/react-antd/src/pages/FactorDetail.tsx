@@ -17,7 +17,8 @@ import {
   Form,
   Divider,
   Tabs,
-  Progress
+  Progress,
+  Tooltip
 } from 'antd'
 import {
   ArrowLeftOutlined,
@@ -25,8 +26,10 @@ import {
   LineChartOutlined,
   EditOutlined,
   DeleteOutlined,
+  CopyOutlined,
   ExperimentOutlined,
-  FundOutlined
+  FundOutlined,
+  QuestionCircleOutlined
 } from '@ant-design/icons'
 import * as echarts from 'echarts'
 import { api } from '@/services/api'
@@ -70,6 +73,16 @@ interface ChartData {
     values: number[]
   }
 }
+
+// 信息提示组件
+const InfoTooltip: React.FC<{ title: string; content: string }> = ({ title, content }) => (
+  <Tooltip title={content} placement="top">
+    <span style={{ cursor: 'help', marginLeft: '4px' }}>
+      {title}
+      <QuestionCircleOutlined style={{ color: '#1890ff', marginLeft: '4px' }} />
+    </span>
+  </Tooltip>
+)
 
 const FactorDetail: React.FC = () => {
   const [searchParams] = useSearchParams()
@@ -327,6 +340,24 @@ const FactorDetail: React.FC = () => {
         }
       }
     })
+  }
+
+  // 复制因子
+  const handleCopyFactor = async () => {
+    if (!factor) return
+
+    try {
+      const response = await api.copyFactor(factor.id) as any
+      if (response.success) {
+        message.success(`因子已复制为 "${response.data.name}"`)
+        // 可选：跳转到新复制的因子详情页
+        // navigate(`/factor-detail?id=${response.data.id}`)
+      } else {
+        message.error(response.message || '复制失败')
+      }
+    } catch (error) {
+      message.error('复制失败')
+    }
   }
 
   // 格式化时间显示
@@ -1159,7 +1190,8 @@ const FactorDetail: React.FC = () => {
       },
       yAxis: {
         type: 'value',
-        name: '因子值'
+        name: '因子值',
+        scale: true  // 自适应高度，不从0开始
       },
       dataZoom: [
         { type: 'inside', start: 0, end: 100 }
@@ -1350,7 +1382,8 @@ const FactorDetail: React.FC = () => {
       },
       yAxis: {
         type: 'value',
-        name: '因子值'
+        name: '因子值',
+        scale: true  // 自适应高度，不从0开始
       },
       dataZoom: [
         { type: 'inside', start: 0, end: 100 }
@@ -2252,6 +2285,13 @@ const FactorDetail: React.FC = () => {
                     >
                       返回
                     </Button>
+                    <Button
+                      icon={<CopyOutlined />}
+                      onClick={handleCopyFactor}
+                      block
+                    >
+                      复制
+                    </Button>
                     {factor.source === 'user' && (
                       <>
                         <Button
@@ -2418,7 +2458,12 @@ const FactorDetail: React.FC = () => {
                           <Row gutter={[16, 16]}>
                             <Col xs={12} sm={6}>
                               <Statistic
-                                title="当前因子值"
+                                title={
+                                  <InfoTooltip
+                                    title="当前因子值"
+                                    content="最新一天计算的因子值，反映了当前时点的因子暴露水平。用于判断当前因子处于高值还是低值状态。"
+                                  />
+                                }
                                 value={exposureData.current_value ?? '-'}
                                 precision={4}
                                 valueStyle={{ color: '#3b82f6', fontSize: '18px', fontWeight: 'bold' }}
@@ -2426,7 +2471,12 @@ const FactorDetail: React.FC = () => {
                             </Col>
                             <Col xs={12} sm={6}>
                               <Statistic
-                                title="分位数"
+                                title={
+                                  <InfoTooltip
+                                    title="分位数"
+                                    content="当前因子值在历史分布中的百分位。例如：80%表示当前值高于历史上80%的时间。用于判断因子暴露相对历史的高低水平。"
+                                  />
+                                }
                                 value={exposureData.percentile ?? '-'}
                                 precision={1}
                                 suffix="%"
@@ -2439,14 +2489,24 @@ const FactorDetail: React.FC = () => {
                             </Col>
                             <Col xs={12} sm={6}>
                               <Statistic
-                                title="滚动标准差"
+                                title={
+                                  <InfoTooltip
+                                    title="滚动标准差"
+                                    content="过去20个交易日的因子值标准差，反映因子的波动性。标准差越大说明因子值波动越剧烈，稳定性越差。"
+                                  />
+                                }
                                 value={exposureData.latest_std ?? '-'}
                                 precision={4}
                               />
                             </Col>
                             <Col xs={12} sm={6}>
                               <Statistic
-                                title="变异系数"
+                                title={
+                                  <InfoTooltip
+                                    title="变异系数"
+                                    content="标准差与均值的比值（无量纲），用于比较不同波动水平。CV越大说明相对波动越大。一般CV<0.3为低波动，0.3-0.7为中等，>0.7为高波动。"
+                                  />
+                                }
                                 value={exposureData.cv ?? '-'}
                                 precision={4}
                               />
@@ -2455,9 +2515,18 @@ const FactorDetail: React.FC = () => {
                         </Card>
 
                         {/* 分位数指示器 */}
-                        <Card bordered={false} style={{ marginBottom: '16px' }}>
+                        <Card
+                          title={
+                            <InfoTooltip
+                              title="因子暴露度分位数"
+                              content="显示当前因子值在历史分布中的位置，用于判断因子暴露相对水平。分位数越低表示因子值越低（低暴露），越高表示因子值越高（高暴露）。"
+                            />
+                          }
+                          bordered={false}
+                          style={{ marginBottom: '16px' }}
+                        >
                           <div style={{ marginBottom: '8px' }}>
-                            <span style={{ fontWeight: 500 }}>因子暴露度分位数：</span>
+                            <span style={{ fontWeight: 500 }}>当前分位数：</span>
                             <span style={{ marginLeft: '8px', color: '#64748b' }}>
                               {exposureData.percentile?.toFixed(1)}%
                             </span>
@@ -2482,12 +2551,29 @@ const FactorDetail: React.FC = () => {
                         </Card>
 
                         {/* 分位数时间序列曲线 */}
-                        <Card title="分位数变化曲线" bordered={false} style={{ marginBottom: '16px' }}>
+                        <Card
+                          title={
+                            <InfoTooltip
+                              title="分位数变化曲线"
+                              content="展示因子值分位数随时间的变化趋势，可以观察因子暴露的周期性和趋势性。适用于判断因子是否处于周期性波动，以及识别极端暴露时期。"
+                            />
+                          }
+                          bordered={false}
+                          style={{ marginBottom: '16px' }}
+                        >
                           <div ref={percentileTimeSeriesRef} className="chart-container" style={{ height: '350px' }}></div>
                         </Card>
 
                         {/* 历史分布直方图 */}
-                        <Card title="历史分布直方图" bordered={false}>
+                        <Card
+                          title={
+                            <InfoTooltip
+                              title="历史分布直方图"
+                              content="展示因子值的历史频率分布，帮助判断因子是否符合正态分布、是否存在肥尾效应。用于识别极端值和评估因子的统计特性。"
+                            />
+                          }
+                          bordered={false}
+                        >
                           <div ref={exposureHistogramRef} className="chart-container" style={{ height: '350px' }}></div>
                         </Card>
                       </>
@@ -2507,7 +2593,12 @@ const FactorDetail: React.FC = () => {
                           <Row gutter={[16, 16]}>
                             <Col xs={12} sm={6}>
                               <Statistic
-                                title="IC均值"
+                                title={
+                                  <InfoTooltip
+                                    title="IC均值"
+                                    content="Information Coefficient均值，衡量因子值与未来收益的相关性。IC>0表示因子值越高收益越高，IC<0则相反。绝对值>0.03为有效，>0.05为优秀。"
+                                  />
+                                }
                                 value={effectivenessData.ic_time_series?.ic_mean ?? '-'}
                                 precision={effectivenessData.ic_time_series?.ic_mean !== undefined ? 4 : undefined}
                                 valueStyle={{
@@ -2519,14 +2610,24 @@ const FactorDetail: React.FC = () => {
                             </Col>
                             <Col xs={12} sm={6}>
                               <Statistic
-                                title="IC标准差"
+                                title={
+                                  <InfoTooltip
+                                    title="IC标准差"
+                                    content="IC的波动性度量，标准差越小IC越稳定。稳定性是因子有效性的重要指标，低标准差意味着因子在不同时期表现一致。"
+                                  />
+                                }
                                 value={effectivenessData.ic_time_series?.ic_std ?? '-'}
                                 precision={effectivenessData.ic_time_series?.ic_std !== undefined ? 4 : undefined}
                               />
                             </Col>
                             <Col xs={12} sm={6}>
                               <Statistic
-                                title="IR比率"
+                                title={
+                                  <InfoTooltip
+                                    title="IR比率"
+                                    content="Information Ratio = IC均值/IC标准差，综合衡量因子有效性和稳定性。IR>0.5为良好，>1.0为优秀。IR越高说明因子既有效又稳定。"
+                                  />
+                                }
                                 value={effectivenessData.ic_time_series?.ir ?? '-'}
                                 precision={effectivenessData.ic_time_series?.ir !== undefined ? 4 : undefined}
                                 valueStyle={{ color: '#22c55e' }}
@@ -2534,7 +2635,12 @@ const FactorDetail: React.FC = () => {
                             </Col>
                             <Col xs={12} sm={6}>
                               <Statistic
-                                title="IC>0比例"
+                                title={
+                                  <InfoTooltip
+                                    title="IC>0比例"
+                                    content="IC为正的天数占比，衡量因子胜率。>50%说明因子多数时期有效，>60%为优秀。高胜率意味着因子可靠性更强。"
+                                  />
+                                }
                                 value={effectivenessData.ic_time_series?.ic_positive_ratio ?? '-'}
                                 precision={effectivenessData.ic_time_series?.ic_positive_ratio !== undefined ? 2 : undefined}
                                 suffix={effectivenessData.ic_time_series?.ic_positive_ratio !== undefined ? '%' : ''}
@@ -2546,7 +2652,15 @@ const FactorDetail: React.FC = () => {
                         {/* 因子有效性图表 */}
                         <Row gutter={[16, 16]}>
                           <Col xs={24} lg={24}>
-                            <Card title="因子-收益散点图" bordered={false}>
+                            <Card
+                              title={
+                                <InfoTooltip
+                                  title="因子-收益散点图"
+                                  content="横轴为因子值，纵轴为未来收益，散点分布反映因子与收益的相关性。若呈现明显向上（下）趋势，说明正（负）相关。点的分布越集中说明相关性越稳定。用于直观判断因子有效性。"
+                                />
+                              }
+                              bordered={false}
+                            >
                               {effectivenessData.scatter_plot?.error ? (
                                 <div style={{ textAlign: 'center', padding: '40px', color: '#ef4444' }}>
                                   {effectivenessData.scatter_plot.error}
@@ -2557,7 +2671,15 @@ const FactorDetail: React.FC = () => {
                             </Card>
                           </Col>
                           <Col xs={24} lg={24}>
-                            <Card title="IC时序分析" bordered={false}>
+                            <Card
+                              title={
+                                <InfoTooltip
+                                  title="IC时序分析"
+                                  content="展示每日IC值的时间序列，包含IC曲线、零线和±1标准差带。用于识别因子在不同时期的有效性变化，识别失效时期。IC持续在零线以上说明因子稳定有效。"
+                                />
+                              }
+                              bordered={false}
+                            >
                               {effectivenessData.ic_time_series?.error ? (
                                 <div style={{ textAlign: 'center', padding: '40px', color: '#ef4444' }}>
                                   {effectivenessData.ic_time_series.error}
@@ -2568,7 +2690,15 @@ const FactorDetail: React.FC = () => {
                             </Card>
                           </Col>
                           <Col xs={24} lg={24}>
-                            <Card title="事件响应分析（高/低暴露后收益）" bordered={false}>
+                            <Card
+                              title={
+                                <InfoTooltip
+                                  title="事件响应分析（高/低暴露后收益）"
+                                  content="当因子值突破高/低阈值后N天的累计收益分布。用于识别因子极端暴露的预测能力，红色（高暴露）高于绿色（低暴露）说明因子能够预测未来收益。"
+                                />
+                              }
+                              bordered={false}
+                            >
                               {effectivenessData.event_response?.error ? (
                                 <div style={{ textAlign: 'center', padding: '40px', color: '#ef4444' }}>
                                   {effectivenessData.event_response.error}
@@ -2579,7 +2709,15 @@ const FactorDetail: React.FC = () => {
                             </Card>
                           </Col>
                           <Col xs={24} lg={24}>
-                            <Card title="因子衰减曲线（IC vs 持有期）" bordered={false}>
+                            <Card
+                              title={
+                                <InfoTooltip
+                                  title="因子衰减曲线（IC vs 持有期）"
+                                  content="展示因子预测能力随持有期延长而衰减的曲线。IC随持有期下降越快，说明因子信息越短暂。用于确定最佳持有周期，通常选择IC衰减前的持仓周期。"
+                                />
+                              }
+                              bordered={false}
+                            >
                               {effectivenessData.decay_analysis?.error ? (
                                 <div style={{ textAlign: 'center', padding: '40px', color: '#ef4444' }}>
                                   {effectivenessData.decay_analysis.error}
@@ -2604,7 +2742,15 @@ const FactorDetail: React.FC = () => {
                       <Row gutter={[16, 16]}>
                         {/* Alpha-Beta 分解 */}
                         <Col xs={24} lg={24}>
-                          <Card title="Alpha-Beta 分析" bordered={false}>
+                          <Card
+                            title={
+                              <InfoTooltip
+                                title="Alpha-Beta 分析"
+                                content="将收益分解为Alpha（超额收益）和Beta（市场风险暴露）。Alpha衡量因子的选股能力，Beta衡量对市场的敏感度。高Alpha说明因子能够获得超额收益，R²>0.7说明拟合良好。"
+                              />
+                            }
+                            bordered={false}
+                          >
                             {attributionData.alpha_beta?.error ? (
                               <div style={{ textAlign: 'center', padding: '20px', color: '#ef4444' }}>
                                 {attributionData.alpha_beta.error}
@@ -2618,7 +2764,12 @@ const FactorDetail: React.FC = () => {
                                   <Row gutter={[16, 16]}>
                                     <Col xs={12} sm={6}>
                                       <Statistic
-                                        title="年化收益"
+                                        title={
+                                          <InfoTooltip
+                                            title="年化收益"
+                                            content="投资组合的年化收益率，衡量投资回报水平。正值表示盈利，负值表示亏损。年化收益>10%为良好，>20%为优秀。"
+                                          />
+                                        }
                                         value={attributionData.alpha_beta.portfolio_return.annual_return ?? '-'}
                                         precision={4}
                                         suffix="%"
@@ -2629,7 +2780,12 @@ const FactorDetail: React.FC = () => {
                                     </Col>
                                     <Col xs={12} sm={6}>
                                       <Statistic
-                                        title="年化波动率"
+                                        title={
+                                          <InfoTooltip
+                                            title="年化波动率"
+                                            content="收益的标准差，衡量投资风险。波动率越大风险越高。一般<15%为低风险，15-30%为中等，>30%为高风险。"
+                                          />
+                                        }
                                         value={attributionData.alpha_beta.portfolio_return.volatility ?? '-'}
                                         precision={4}
                                         suffix="%"
@@ -2637,14 +2793,24 @@ const FactorDetail: React.FC = () => {
                                     </Col>
                                     <Col xs={12} sm={6}>
                                       <Statistic
-                                        title="夏普比率"
+                                        title={
+                                          <InfoTooltip
+                                            title="夏普比率"
+                                            content="风险调整后收益指标 = (收益-无风险利率)/波动率。夏普>1为良好，>2为优秀。数值越高说明单位风险的收益越高。"
+                                          />
+                                        }
                                         value={attributionData.alpha_beta.portfolio_return.sharpe ?? '-'}
                                         precision={4}
                                       />
                                     </Col>
                                     <Col xs={12} sm={6}>
                                       <Statistic
-                                        title="日均收益"
+                                        title={
+                                          <InfoTooltip
+                                            title="日均收益"
+                                            content="每日平均收益率，反映日常盈利水平。用于评估短期收益能力。"
+                                          />
+                                        }
                                         value={attributionData.alpha_beta.portfolio_return.daily_mean ?? '-'}
                                         precision={6}
                                       />
@@ -2657,7 +2823,12 @@ const FactorDetail: React.FC = () => {
                                 <Row gutter={[16, 16]} style={{ marginBottom: '16px' }}>
                                   <Col xs={12} sm={6}>
                                     <Statistic
-                                      title="年化 Alpha"
+                                      title={
+                                        <InfoTooltip
+                                          title="年化 Alpha"
+                                          content="超额收益，衡量因子超越市场的能力。Alpha>0说明因子能获得超额收益，>5%为优秀，<0说明跑输市场。"
+                                        />
+                                      }
                                       value={attributionData.alpha_beta?.alpha ?? '-'}
                                       precision={4}
                                       suffix="%"
@@ -2668,21 +2839,36 @@ const FactorDetail: React.FC = () => {
                                   </Col>
                                   <Col xs={12} sm={6}>
                                     <Statistic
-                                      title="Beta"
+                                      title={
+                                        <InfoTooltip
+                                          title="Beta"
+                                          content="市场风险暴露，衡量因子对市场的敏感度。Beta=1表示与市场同步，>1表示高弹性（涨跌幅大于市场），<1表示低弹性。"
+                                        />
+                                      }
                                       value={attributionData.alpha_beta?.beta ?? '-'}
                                       precision={4}
                                     />
                                   </Col>
                                   <Col xs={12} sm={6}>
                                     <Statistic
-                                      title="拟合度 (R²)"
+                                      title={
+                                        <InfoTooltip
+                                          title="拟合度 (R²)"
+                                          content="模型解释力，0-1之间，越接近1说明市场风险对收益解释越强。R²>0.7为良好拟合，>0.9为优秀拟合。"
+                                        />
+                                      }
                                       value={attributionData.alpha_beta?.r_squared ?? '-'}
                                       precision={4}
                                     />
                                   </Col>
                                   <Col xs={12} sm={6}>
                                     <Statistic
-                                      title="日均 Alpha"
+                                      title={
+                                        <InfoTooltip
+                                          title="日均 Alpha"
+                                          content="每日平均超额收益，反映日常超越市场的能力。用于评估短期超额收益稳定性。"
+                                        />
+                                      }
                                       value={attributionData.alpha_beta?.daily_alpha ?? '-'}
                                       precision={6}
                                     />
@@ -2700,7 +2886,15 @@ const FactorDetail: React.FC = () => {
 
                         {/* 收益分解 */}
                         <Col xs={24} lg={24}>
-                          <Card title="收益分解" bordered={false}>
+                          <Card
+                            title={
+                              <InfoTooltip
+                                title="收益分解"
+                                content="将总收益分解为因子收益和残差收益，展示因子的贡献度。因子收益越高说明因子对总收益贡献越大，残差收益是未被因子解释的部分。"
+                              />
+                            }
+                            bordered={false}
+                          >
                             {attributionData.return_decomposition?.error ? (
                               <div style={{ textAlign: 'center', padding: '20px', color: '#ef4444' }}>
                                 {attributionData.return_decomposition.error}
@@ -2879,7 +3073,15 @@ const FactorDetail: React.FC = () => {
                       <Row gutter={[16, 16]}>
                         {/* 滚动窗口带状图 */}
                         <Col xs={24} lg={24}>
-                          <Card title="滚动窗口图（均值 ± 2倍标准差）" bordered={false}>
+                          <Card
+                            title={
+                              <InfoTooltip
+                                title="滚动窗口图（均值 ± 2倍标准差）"
+                                content="展示因子值、滚动均值和置信区间（均值±2倍标准差）。用于识别异常值（超出置信区间）和判断因子稳定性。置信区间窄说明因子波动小，宽说明波动大。"
+                              />
+                            }
+                            bordered={false}
+                          >
                             {monitoringData.rolling_chart?.error ? (
                               <div style={{ textAlign: 'center', padding: '20px', color: '#ef4444' }}>
                                 {monitoringData.rolling_chart.error}
@@ -2892,7 +3094,15 @@ const FactorDetail: React.FC = () => {
 
                         {/* 暴露度转移矩阵 */}
                         <Col xs={24} lg={24}>
-                          <Card title="暴露度转移矩阵（马尔可夫转移概率）" bordered={false}>
+                          <Card
+                            title={
+                              <InfoTooltip
+                                title="暴露度转移矩阵（马尔可夫转移概率）"
+                                content="展示因子暴露状态（低/中/高）之间的转移概率，颜色越深表示转移概率越高。用于预测因子未来状态，判断因子的持续性。对角线元素高说明状态稳定。"
+                              />
+                            }
+                            bordered={false}
+                          >
                             {monitoringData.transition_matrix?.error ? (
                               <div style={{ textAlign: 'center', padding: '20px', color: '#ef4444' }}>
                                 {monitoringData.transition_matrix.error}
@@ -2905,7 +3115,15 @@ const FactorDetail: React.FC = () => {
 
                         {/* 结构断点检测 */}
                         <Col xs={24} lg={24}>
-                          <Card title="结构性断点检测" bordered={false}>
+                          <Card
+                            title={
+                              <InfoTooltip
+                                title="结构性断点检测"
+                                content="识别因子序列中的结构性变化点（统计显著的位置）。用于发现市场制度变化、因子失效时期。断点越多说明因子稳定性越差，需谨慎使用。"
+                              />
+                            }
+                            bordered={false}
+                          >
                             {monitoringData.structural_break?.error ? (
                               <div style={{ textAlign: 'center', padding: '20px', color: '#ef4444' }}>
                                 {monitoringData.structural_break.error}
@@ -2931,7 +3149,15 @@ const FactorDetail: React.FC = () => {
 
                         {/* 周期性分析 */}
                         <Col xs={24} lg={24}>
-                          <Card title="周期性分析（FFT 傅里叶变换）" bordered={false}>
+                          <Card
+                            title={
+                              <InfoTooltip
+                                title="周期性分析（FFT 傅里叶变换）"
+                                content="通过傅里叶变换识别因子序列中的周期成分。横轴为周期（天数），纵轴为功率（强度）。用于发现因子的季节性规律，如月度效应、季度效应等。峰值越突出说明周期性越明显。"
+                              />
+                            }
+                            bordered={false}
+                          >
                             {monitoringData.seasonality?.error ? (
                               <div style={{ textAlign: 'center', padding: '20px', color: '#ef4444' }}>
                                 {monitoringData.seasonality.error}

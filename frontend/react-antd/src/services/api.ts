@@ -147,6 +147,11 @@ export const api = {
     return request.post('/factors/batch-generate', data)
   },
 
+  // 复制因子
+  copyFactor(id: number) {
+    return request.post(`/factors/${id}/copy`)
+  },
+
   // 因子暴露度分析
   analyzeExposure(data: {
     factor_name: string
@@ -185,6 +190,33 @@ export const api = {
     end_date: string
   }) {
     return request.post('/analysis/monitoring', data)
+  },
+
+  // 遗传算法挖掘
+  startGeneticMining(data: {
+    stock_code: string
+    base_factors: string[]
+    start_date: string
+    end_date: string
+    population_size: number
+    n_generations: number
+    cx_prob: number
+    mut_prob: number
+    elite_size: number
+    fitness_objective: string
+    ic_threshold: number
+  }) {
+    return request.post('/mining/genetic', data)
+  },
+
+  // 获取挖掘状态
+  getMiningStatus(taskId: string) {
+    return request.get(`/mining/status/${taskId}`)
+  },
+
+  // 获取挖掘结果
+  getMiningResults(taskId: string) {
+    return request.get(`/mining/results/${taskId}`)
   }
 }
 
