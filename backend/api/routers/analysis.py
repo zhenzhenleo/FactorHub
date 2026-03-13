@@ -5,8 +5,19 @@ from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel
 from typing import List, Optional, Dict
 import pandas as pd
+import numpy as np
 import sys
 from pathlib import Path
+
+
+def safe_numeric_value(value):
+    """安全处理数值，将NaN和无穷大转换为None"""
+    if value is None:
+        return None
+    if np.isnan(value) or np.isinf(value):
+        return None
+    return float(value)
+
 
 sys.path.insert(0, str(Path(__file__).parent.parent.parent.parent))
 
@@ -120,8 +131,8 @@ async def calculate_factor(request: CalculateRequest):
                 valid_dates = valid_data.index.strftime('%Y-%m-%d').tolist()
                 valid_factor_values = valid_data[request.factor_name].tolist()
 
-                # 额外检查：确保所有值都是有效的数字，转换 NaN 为 None
-                valid_factor_values = [None if (isinstance(v, float) and (v != v)) else v for v in valid_factor_values]
+                # 额外检查：确保所有值都是有效的数字，转换 NaN 和 inf 为 None
+                valid_factor_values = [safe_numeric_value(v) for v in valid_factor_values]
 
                 # 移除值为 None 的项
                 filtered_dates = []
@@ -147,10 +158,10 @@ async def calculate_factor(request: CalculateRequest):
                     "dates": valid_dates,
                     "factor_values": valid_factor_values,
                     "statistics": {
-                        "mean": float(factor_series.mean()) if len(factor_series) > 0 else 0,
-                        "std": float(factor_series.std()) if len(factor_series) > 0 else 0,
-                        "min": float(factor_series.min()) if len(factor_series) > 0 else 0,
-                        "max": float(factor_series.max()) if len(factor_series) > 0 else 0,
+                        "mean": safe_numeric_value(factor_series.mean()) if len(factor_series) > 0 else None,
+                        "std": safe_numeric_value(factor_series.std()) if len(factor_series) > 0 else None,
+                        "min": safe_numeric_value(factor_series.min()) if len(factor_series) > 0 else None,
+                        "max": safe_numeric_value(factor_series.max()) if len(factor_series) > 0 else None,
                         "count": int(factor_series.count())
                     }
                 }

@@ -181,7 +181,11 @@
       "Bash(node tests/test_factor_naming.js)",
       "Bash(test -f \"f:\\\\pythonproject\\\\FactorFlow\\\\frontend\\\\react-antd\\\\src\\\\pages\\\\PortfolioAnalysis.tsx\")",
       "Bash(npx tsc --noEmit src/pages/PortfolioAnalysis.tsx)",
-      "Bash(npx tsc --noEmit --skipLibCheck src/pages/FactorManagement.tsx)"
+      "Bash(npx tsc --noEmit --skipLibCheck src/pages/FactorManagement.tsx)",
+      "Bash(node -e ':*)",
+      "Bash(npm install -g markdownlint-cli)",
+      "Bash(markdownlint --fix README.md)",
+      "Bash(markdownlint --fix f:/pythonproject/FactorFlow/README.md)"
     ],
     "deny": [],
     "ask": []

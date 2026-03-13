@@ -557,12 +557,15 @@ const FactorMining: React.FC = () => {
     index: number,
     retryCount: number = 0,
   ) => {
-    // 生成因子名称：Mined_Factor_序号_年月日_股票代码
+    // 生成因子名称：Mined_Factor_序号_年月日时分秒_股票代码
     const today = new Date();
     const dateStr = [
       today.getFullYear(),
       String(today.getMonth() + 1).padStart(2, "0"),
       String(today.getDate()).padStart(2, "0"),
+      String(today.getHours()).padStart(2, "0"),
+      String(today.getMinutes()).padStart(2, "0"),
+      String(today.getSeconds()).padStart(2, "0"),
     ].join("");
 
     // 确保使用有效的股票代码
@@ -741,12 +744,15 @@ const FactorMining: React.FC = () => {
       return;
     }
 
-    // 生成日期字符串
+    // 生成日期字符串（包含时分秒）
     const today = new Date();
     const dateStr = [
       today.getFullYear(),
       String(today.getMonth() + 1).padStart(2, "0"),
       String(today.getDate()).padStart(2, "0"),
+      String(today.getHours()).padStart(2, "0"),
+      String(today.getMinutes()).padStart(2, "0"),
+      String(today.getSeconds()).padStart(2, "0"),
     ].join("");
 
     // 确保使用有效的股票代码
@@ -754,48 +760,75 @@ const FactorMining: React.FC = () => {
 
     let successCount = 0;
     let failCount = 0;
-    let renamedCount = 0;
 
     for (let i = 0; i < miningResult.factors.length; i++) {
       const factor = miningResult.factors[i];
 
-      const result = await saveSingleFactorWithRetry(
-        factor,
-        i,
-        dateStr,
-        stockCode,
-      );
+      // 直接生成唯一的因子名称（包含序号、日期时间、股票代码）
+      const factorName = `Mined_Factor_${i + 1}_${dateStr}_${stockCode}`;
 
-      if (result.success) {
-        successCount++;
-        if (result.name) {
-          setSavedFactorNames((prev) => new Set(prev).add(result.name!));
+      try {
+        // 生成完整的因子函数代码
+        const processedExpr = factor.expression
+          .replace(/\bopen\b/g, "df['open']")
+          .replace(/\bclose\b/g, "df['close']")
+          .replace(/\bhigh\b/g, "df['high']")
+          .replace(/\blow\b/g, "df['low']")
+          .replace(/\bvolume\b/g, "df['volume']");
+
+        const factorCode = `def calculate_factor(df):
+    """
+    遗传算法挖掘因子
+    表达式: ${factor.expression}
+    IC: ${factor.ic?.toFixed(4)}
+    IR: ${factor.ir?.toFixed(4)}
+    """
+    import pandas as pd
+    import numpy as np
+
+    try:
+        result = ${processedExpr}
+        return result
+    except Exception as e:
+        return pd.Series(0, index=df.index)
+`;
+
+        const factorData = {
+          name: factorName,
+          code: factorCode,
+          category: "遗传挖掘",
+          description: `通过遗传算法挖掘的因子 | 表达式: ${factor.expression} | IC: ${factor.ic?.toFixed(4)} | IR: ${factor.ir?.toFixed(4)} | 适应度: ${factor.fitness?.toFixed(4)}`,
+          formula_type: "function",
+        };
+
+        const response = (await api.createFactor(factorData)) as any;
+
+        if (response.success) {
+          successCount++;
+          message.success(`因子 "${factorName}" 已保存到自定义因子库`);
+          setSavedFactorNames((prev) => new Set(prev).add(factorName));
+          await loadFactors();
+        } else {
+          failCount++;
+          message.error(
+            "保存失败: " +
+              (response.data?.detail || response.message || "未知错误"),
+          );
         }
-        if (result.renamed) {
-          renamedCount++;
-        }
-        console.log(`Factor ${i + 1} saved successfully as ${result.name}`);
-      } else {
+      } catch (error: any) {
         failCount++;
-        console.error(`Factor ${i + 1} save failed after retries`);
+        console.error("保存因子失败:", error);
+        const errorMsg =
+          error.response?.data?.detail ||
+          error.response?.data?.message ||
+          error.message ||
+          "未知错误";
+        message.error(`保存因子失败: ${errorMsg}`);
       }
     }
 
-    // 刷新因子列表
-    await loadFactors();
-
     // 显示结果消息
-    if (renamedCount > 0) {
-      if (failCount === 0) {
-        message.success(
-          `保存完成: 成功 ${successCount} 个（其中 ${renamedCount} 个使用了新名称）`,
-        );
-      } else {
-        message.warning(
-          `保存完成: 成功 ${successCount} 个, 失败 ${failCount} 个（其中 ${renamedCount} 个使用了新名称）`,
-        );
-      }
-    } else if (failCount === 0) {
+    if (failCount === 0) {
       message.success(`成功保存 ${successCount} 个因子到自定义因子库`);
     } else {
       message.warning(

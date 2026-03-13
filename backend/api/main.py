@@ -4,9 +4,12 @@ FastAPI主应用
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
+from fastapi.encoders import jsonable_encoder
 from contextlib import asynccontextmanager
 import sys
 from pathlib import Path
+import numpy as np
+import json
 
 # 添加项目根目录到Python路径
 sys.path.insert(0, str(Path(__file__).parent.parent.parent))
@@ -42,6 +45,30 @@ async def lifespan(app: FastAPI):
     print("关闭FastAPI服务...")
 
 
+# 自定义JSON编码器来处理numpy浮点数值
+class NumpyJSONEncoder(json.JSONEncoder):
+    """自定义JSON编码器"""
+    def default(self, obj):
+        if isinstance(obj, np.integer):
+            return int(obj)
+        elif isinstance(obj, np.floating):
+            if np.isinf(obj) or np.isnan(obj):
+                return None
+            return float(obj)
+        elif isinstance(obj, np.ndarray):
+            return obj.tolist()
+        return super().default(obj)
+
+
+# 配置JSON编码器
+def jsonable_encoder_with_numpy(obj, *args, **kwargs):
+    """处理numpy类型的JSON编码器"""
+    try:
+        return jsonable_encoder(obj, *args, **kwargs, custom_serializer=lambda x: NumpyJSONEncoder().default(x))
+    except:
+        return jsonable_encoder(obj, *args, **kwargs)
+
+
 # 创建FastAPI应用
 app = FastAPI(
     title="FactorFlow API",
@@ -49,7 +76,8 @@ app = FastAPI(
     version="1.0.0",
     lifespan=lifespan,
     docs_url="/docs",
-    redoc_url="/redoc"
+    redoc_url="/redoc",
+    default_response_class=JSONResponse
 )
 
 # 配置CORS
@@ -99,6 +127,12 @@ async def health_check():
 
 
 # 全局异常处理
+# 覆盖FastAPI的默认JSON响应编码器
+@app.on_event("startup")
+async def startup_event():
+    """应用启动事件 - 覆盖默认JSON编码器"""
+    app.json_encoder = NumpyJSONEncoder
+
 @app.exception_handler(Exception)
 async def global_exception_handler(request, exc):
     """全局异常处理"""
