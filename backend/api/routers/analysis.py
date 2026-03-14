@@ -202,7 +202,7 @@ async def calculate_ic(request: ICAnalysisRequest):
     try:
         logger.info(f"开始IC分析: {request.factor_name}, 股票: {request.stock_codes}, 时间: {request.start_date} - {request.end_date}")
 
-        # 调用分析服务的 analyze 方法
+        # 先尝试使用缓存
         result = analysis_service.analyze(
             stock_codes=request.stock_codes,
             factor_names=[request.factor_name],
@@ -219,6 +219,23 @@ async def calculate_ic(request: ICAnalysisRequest):
         ic_stats = ic_ir_data.get("ic_stats", {})
 
         logger.info(f"提取的ic_stats: {ic_stats}")
+
+        # 如果缓存中的数据无效，重新计算
+        if not ic_stats or len(ic_stats) == 0:
+            logger.warning("缓存中的数据无效，重新计算IC分析")
+            result = analysis_service.analyze(
+                stock_codes=request.stock_codes,
+                factor_names=[request.factor_name],
+                start_date=request.start_date,
+                end_date=request.end_date,
+                use_cache=False,  # 不使用缓存
+                rolling_window=252
+            )
+
+            # 重新提取
+            ic_ir_data = result.get("ic_ir", {})
+            ic_stats = ic_ir_data.get("ic_stats", {})
+            logger.info(f"重新计算的ic_stats: {ic_stats}")
 
         simplified_result = {
             "metadata": result.get("metadata", {}),

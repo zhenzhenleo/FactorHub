@@ -238,8 +238,10 @@ class FactorCalculator:
         """
         import pandas as pd
 
-        # 检测是否是函数形式
-        is_function = factor_code.strip().startswith("def ")
+        # 检测是否是函数形式（去除注释和空行后再检查）
+        lines = factor_code.strip().split('\n')
+        code_lines = [line for line in lines if line.strip() and not line.strip().startswith('#')]
+        is_function = len(code_lines) > 0 and code_lines[0].strip().startswith("def ")
 
         if is_function:
             # 函数形式：使用 exec 执行函数定义，然后调用函数
@@ -400,7 +402,11 @@ class FactorCalculator:
         for col in df.columns:
             rolling_mean = df[col].rolling(window=window, min_periods=1).mean()
             rolling_std = df[col].rolling(window=window, min_periods=1).std()
-            result[col] = (df[col] - rolling_mean) / rolling_std
+            # 避免除以0，当标准差为0或接近0时，返回0而不是inf
+            rolling_std_safe = rolling_std.replace(0, np.nan).fillna(1e-10)
+            result[col] = (df[col] - rolling_mean) / rolling_std_safe
+            # 将无穷大值替换为NaN
+            result[col] = result[col].replace([np.inf, -np.inf], np.nan)
         return result
 
     def add_time_features(self, df: pd.DataFrame) -> pd.DataFrame:
@@ -1207,6 +1213,10 @@ class FactorService:
 
         # 合并原始数据
         result = pd.concat([df, factor_df], axis=1)
+
+        # 最终清理：将所有无穷大值替换为NaN
+        for col in result.select_dtypes(include=[np.number]).columns:
+            result[col] = result[col].replace([np.inf, -np.inf], np.nan)
 
         return result
 

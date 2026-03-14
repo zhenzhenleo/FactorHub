@@ -348,12 +348,56 @@ async def optimize_weights(request: OptimizeWeightsRequest):
             "weights": weights,
             "method": request.method,
             "factors": request.factors,
+            "stock_code": request.stock_code,
             "metrics": {
                 "return": float(portfolio_return),
                 "ic": float(portfolio_ic),
                 "ir": float(portfolio_ir)
             }
         }
+
+        # 计算综合得分（使用优化后的权重）
+        try:
+            composite_score_result = portfolio_analysis_service.calculate_combined_factor_score(
+                factor_data=factor_values,
+                weights=weights,
+                normalize=True
+            )
+
+            # 转换为列表格式
+            if hasattr(composite_score_result, 'index'):
+                composite_score = {
+                    "dates": composite_score_result.index.astype(str).tolist(),
+                    "values": composite_score_result.values.tolist()
+                }
+            else:
+                composite_score = {"values": list(composite_score_result)}
+
+            # 计算统计指标
+            values = composite_score.get("values", [])
+            if len(values) > 0:
+                import numpy as np
+                composite_stats = {
+                    "mean": float(np.mean(values)),
+                    "std": float(np.std(values)),
+                    "min": float(np.min(values)),
+                    "max": float(np.max(values))
+                }
+            else:
+                composite_stats = {}
+
+            # 转换 numpy 类型
+            composite_score = convert_numpy_types(composite_score)
+            composite_stats = convert_numpy_types(composite_stats)
+
+        except Exception as e:
+            print(f"[WARNING] 计算综合得分失败: {e}")
+            composite_score = None
+            composite_stats = {}
+
+        # 添加综合得分到结果中
+        result["composite_score"] = composite_score
+        result["composite_stats"] = composite_stats
 
         # 转换 numpy 类型为 Python 原生类型，以避免 JSON 序列化错误
         result = convert_numpy_types(result)
@@ -447,13 +491,14 @@ async def calculate_composite_score(request: CompositeScoreRequest):
 
 @router.post("/compare-methods")
 async def compare_weight_methods(request: CompareMethodsRequest):
-    """对比权重方法"""
+    """对比权重方法 - 基于IC/IR指标评估不同权重优化方法的效果"""
     try:
         from backend.services.data_service import data_service
         from backend.services.factor_service import factor_service
         from backend.repositories.factor_repository import FactorRepository
         from backend.core.database import get_db_session
         import pandas as pd
+        import numpy as np
 
         # 获取股票数据
         stock_data = data_service.get_stock_data(
@@ -483,7 +528,7 @@ async def compare_weight_methods(request: CompareMethodsRequest):
         for factor_name, factor_def in factor_defs.items():
             try:
                 values = factor_service.calculator.calculate(stock_data, factor_def.code)
-                if values is not None:
+                if values is not None and len(values.dropna()) > 0:
                     factor_data[factor_name] = values
             except Exception as e:
                 print(f"计算因子 {factor_name} 失败: {e}")
@@ -492,30 +537,203 @@ async def compare_weight_methods(request: CompareMethodsRequest):
         if not factor_data:
             raise HTTPException(status_code=400, detail="没有有效的因子数据")
 
-        # 计算因子收益率（简化：使用价格变化率）
-        factor_returns = {}
-        for name, values in factor_data.items():
-            # 将因子值转换为收益率（简化实现）
-            returns = values.pct_change().dropna()
-            factor_returns[name] = returns
+        # 计算未来收益率（用于IC计算）
+        returns = stock_data['close'].pct_change().shift(-1)
 
-        # 转换为DataFrame
-        factor_returns_df = pd.DataFrame(factor_returns)
+        # 对每种权重方法进行测试
+        results = {}
+        for method in request.methods:
+            try:
+                # 1. 计算该方法的因子权重
+                if method == "equal_weight":
+                    n = len(request.factors)
+                    weights = {f: 1.0/n for f in request.factors}
 
-        # 调用方法对比
-        result = portfolio_analysis_service.compare_weight_methods(
-            factor_returns=factor_returns_df,
-            methods=request.methods
-        )
+                elif method == "ic_weight":
+                    # IC加权：计算每个因子与收益率的相关系数
+                    ic_values = {}
+                    for factor_name, factor_values in factor_data.items():
+                        # 对齐数据
+                        aligned = pd.DataFrame({
+                            'factor': factor_values,
+                            'returns': returns
+                        }).dropna()
 
-        # 转换 numpy 类型为 Python 原生类型，以避免 JSON 序列化错误
-        result = convert_numpy_types(result)
+                        if len(aligned) > 10:
+                            ic = aligned['factor'].corr(aligned['returns'])
+                            ic_values[factor_name] = abs(ic) if not np.isnan(ic) else 0
+                        else:
+                            ic_values[factor_name] = 0
+
+                    total_ic = sum(ic_values.values())
+                    if total_ic > 0:
+                        weights = {f: (ic_values.get(f, 0) + 0.01) / (total_ic + 0.01 * len(ic_values)) for f in request.factors}
+                    else:
+                        weights = {f: 1.0/len(request.factors) for f in request.factors}
+
+                elif method == "ir_weight":
+                    # IR加权：计算IC均值/IC标准差
+                    ir_values = {}
+                    for factor_name, factor_values in factor_data.items():
+                        aligned = pd.DataFrame({
+                            'factor': factor_values,
+                            'returns': returns
+                        }).dropna()
+
+                        if len(aligned) > 20:
+                            # 滚动IC
+                            ic_series = aligned['factor'].rolling(
+                                window=20, min_periods=10
+                            ).corr(aligned['returns'])
+
+                            ic_mean = ic_series.mean()
+                            ic_std = ic_series.std()
+                            ir = ic_mean / ic_std if ic_std > 0 else 0
+                            ir_values[factor_name] = abs(ir) if not np.isnan(ir) else 0
+                        else:
+                            ir_values[factor_name] = 0
+
+                    total_ir = sum(ir_values.values())
+                    if total_ir > 0:
+                        weights = {f: (ir_values.get(f, 0) + 0.01) / (total_ir + 0.01 * len(ir_values)) for f in request.factors}
+                    else:
+                        weights = {f: 1.0/len(request.factors) for f in request.factors}
+
+                elif method == "max_sharpe":
+                    # 最大夏普：简化为使用IC/波动率
+                    sharpe_values = {}
+                    for factor_name, factor_values in factor_data.items():
+                        aligned = pd.DataFrame({
+                            'factor': factor_values,
+                            'returns': returns
+                        }).dropna()
+
+                        if len(aligned) > 10:
+                            ic = aligned['factor'].corr(aligned['returns'])
+                            factor_vol = aligned['factor'].std()
+                            sharpe = abs(ic) / factor_vol if factor_vol > 0 else 0
+                            sharpe_values[factor_name] = sharpe if not np.isnan(sharpe) else 0
+                        else:
+                            sharpe_values[factor_name] = 0
+
+                    total_sharpe = sum(sharpe_values.values())
+                    if total_sharpe > 0:
+                        weights = {f: (sharpe_values.get(f, 0) + 0.01) / (total_sharpe + 0.01 * len(sharpe_values)) for f in request.factors}
+                    else:
+                        weights = {f: 1.0/len(request.factors) for f in request.factors}
+
+                elif method == "max_return":
+                    # 最大收益：使用IC绝对值
+                    return_values = {}
+                    for factor_name, factor_values in factor_data.items():
+                        aligned = pd.DataFrame({
+                            'factor': factor_values,
+                            'returns': returns
+                        }).dropna()
+
+                        if len(aligned) > 10:
+                            # 标准化
+                            factor_norm = (aligned['factor'] - aligned['factor'].mean()) / (aligned['factor'].std() + 1e-8)
+                            returns_norm = (aligned['returns'] - aligned['returns'].mean()) / (aligned['returns'].std() + 1e-8)
+
+                            corr = factor_norm.corr(returns_norm)
+                            return_values[factor_name] = abs(corr) if not np.isnan(corr) else 0
+                        else:
+                            return_values[factor_name] = 0
+
+                    total_return = sum(return_values.values())
+                    if total_return > 0:
+                        weights = {f: (return_values.get(f, 0) + 0.01) / (total_return + 0.01 * len(return_values)) for f in request.factors}
+                    else:
+                        weights = {f: 1.0/len(request.factors) for f in request.factors}
+
+                elif method == "min_variance":
+                    # 最小方差：根据因子方差反向加权
+                    variance_values = {}
+                    for factor_name, factor_values in factor_data.items():
+                        var = factor_values.var()
+                        inv_var = 1.0 / (var + 1e-8) if not np.isnan(var) and var > 0 else 1.0
+                        variance_values[factor_name] = inv_var
+
+                    total_var = sum(variance_values.values())
+                    if total_var > 0:
+                        weights = {f: variance_values.get(f, 0) / total_var for f in request.factors}
+                    else:
+                        weights = {f: 1.0/len(request.factors) for f in request.factors}
+
+                else:
+                    # 未知方法，使用等权重
+                    weights = {f: 1.0/len(request.factors) for f in request.factors}
+
+                # 2. 构建加权组合因子
+                factor_df = pd.DataFrame(index=stock_data.index)
+                for factor_name, values in factor_data.items():
+                    factor_df[factor_name] = values
+
+                # 计算加权组合
+                weighted_factor = pd.Series(0.0, index=factor_df.index)
+                for factor_name, weight in weights.items():
+                    if factor_name in factor_df.columns:
+                        weighted_factor += factor_df[factor_name].fillna(0) * weight
+
+                weighted_factor = weighted_factor.dropna()
+
+                # 3. 计算组合因子的IC/IR统计
+                aligned = pd.DataFrame({
+                    'factor': weighted_factor,
+                    'returns': returns
+                }).dropna()
+
+                if len(aligned) >= 20:
+                    # 计算IC时间序列
+                    ic_series = aligned['factor'].rolling(
+                        window=20, min_periods=10
+                    ).corr(aligned['returns'])
+
+                    # 计算统计指标
+                    ic_mean = ic_series.mean()
+                    ic_std = ic_series.std()
+                    ir = ic_mean / ic_std if ic_std > 0 else 0
+
+                    results[method] = {
+                        "ic_mean": float(ic_mean),
+                        "ic_std": float(ic_std),
+                        "ir": float(ir),
+                        "annual_return": float(ic_mean * 252),  # 年化IC作为收益代理
+                        "volatility": float(ic_std * np.sqrt(252)),  # 年化IC标准差作为波动代理
+                        "sharpe_ratio": float(ir)  # IR本身就像是夏普比率
+                    }
+                else:
+                    results[method] = {
+                        "ic_mean": 0.0,
+                        "ic_std": 0.0,
+                        "ir": 0.0,
+                        "annual_return": 0.0,
+                        "volatility": 0.0,
+                        "sharpe_ratio": 0.0
+                    }
+
+            except Exception as e:
+                print(f"方法 {method} 计算失败: {e}")
+                import traceback
+                traceback.print_exc()
+                results[method] = {
+                    "ic_mean": 0.0,
+                    "ic_std": 0.0,
+                    "ir": 0.0,
+                    "annual_return": 0.0,
+                    "volatility": 0.0,
+                    "sharpe_ratio": 0.0
+                }
 
         return {
             "success": True,
             "data": {
-                "results": result
+                "results": results
             }
         }
     except Exception as e:
+        import traceback
+        print(f"方法对比失败: {e}")
+        traceback.print_exc()
         raise HTTPException(status_code=500, detail=str(e))

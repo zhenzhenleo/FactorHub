@@ -67,3 +67,6 @@ data/db/factorflow.db
 logs/
 vite-app/
 vite-naive-ui/
+
+CLAUDE.md
+scripts/

@@ -59,11 +59,22 @@ interface OptimizationResult {
     weights: Record<string, number>
     sharpe_ratio: number
   }>
+  composite_score?: {
+    dates: string[]
+    values: number[]
+  }
+  composite_stats?: {
+    mean: number
+    std: number
+    min: number
+    max: number
+  }
 }
 
 const PortfolioAnalysis: React.FC = () => {
   const navigate = useNavigate()
   const [optimizeForm] = Form.useForm()
+  const [compareForm] = Form.useForm()
   const weightChartRef = useRef<HTMLDivElement>(null)
   const convergenceChartRef = useRef<HTMLDivElement>(null)
   const weightChartInstanceRef = useRef<echarts.ECharts | null>(null)
@@ -86,10 +97,6 @@ const PortfolioAnalysis: React.FC = () => {
   const [activeTab, setActiveTab] = useState('weights')
   const [compositeFactorCode, setCompositeFactorCode] = useState<string>('')
   const [savingFactor, setSavingFactor] = useState(false)
-
-  // 综合得分状态
-  const [compositeResult, setCompositeResult] = useState<any>(null)
-  const [compositeStats, setCompositeStats] = useState<any>(null)
 
   // 方法对比状态
   const [compareResult, setCompareResult] = useState<any>(null)
@@ -198,6 +205,14 @@ const PortfolioAnalysis: React.FC = () => {
         setTimeout(() => {
           console.log('[runOptimization] 开始更新图表')
           updateCharts(resultData)
+
+          // 如果有综合得分数据，也更新综合得分图表
+          if (resultData.composite_score) {
+            updateCompositeScoreChart(resultData.composite_score)
+            if (resultData.composite_score.values) {
+              updateCompositeDistChart(resultData.composite_score.values)
+            }
+          }
         }, 300)
       } else {
         message.error(response.data.message || '优化失败')
@@ -556,8 +571,22 @@ ${factorNames.map(name => `    ${name}: ${(weights[name] * 100).toFixed(2)}%`).j
     const method = optimizationResult.method || 'equal_weight'
     const factorNames = Object.keys(optimizationResult.weights || {})
 
+    // 生成时间戳：年月日时分秒格式 (YYYYMMDDHHMMSS)
+    const now = new Date()
+    const year = now.getFullYear()
+    const month = String(now.getMonth() + 1).padStart(2, '0')
+    const day = String(now.getDate()).padStart(2, '0')
+    const hours = String(now.getHours()).padStart(2, '0')
+    const minutes = String(now.getMinutes()).padStart(2, '0')
+    const seconds = String(now.getSeconds()).padStart(2, '0')
+    const timestamp = `${year}${month}${day}${hours}${minutes}${seconds}`
+
+    // 获取股票代码
+    const stockCode = optimizationResult.stock_code || '000001'
+
+    // 新命名格式：组合因子_目标函数_年月日时分秒_股票代码
     const factorData = {
-      name: `组合因子_${methodDisplay[method]}`,
+      name: `组合因子_${method}_${timestamp}_${stockCode}`,
       category: '组合因子',
       description: `基于${factorNames.length}个因子的${methodDisplay[method]}优化组合`,
       code: compositeFactorCode,
@@ -581,81 +610,6 @@ ${factorNames.map(name => `    ${name}: ${(weights[name] * 100).toFixed(2)}%`).j
       message.error('保存组合因子失败: ' + errorMsg)
     } finally {
       setSavingFactor(false)
-    }
-  }
-
-  // ========== 综合得分相关函数 ==========
-
-  // 计算综合得分
-  const runCompositeScore = async (values: any) => {
-    const selectedFactors = values.composite_factors || []
-
-    if (selectedFactors.length < 1) {
-      message.warning('请至少选择1个因子')
-      return
-    }
-
-    const [startDate, endDate] = values.dateRange
-    const requestData = {
-      stock_code: values.stock_code || '000001', // 添加必需的 stock_code 字段
-      factors: selectedFactors,
-      start_date: startDate.format('YYYY-MM-DD'),
-      end_date: endDate.format('YYYY-MM-DD')
-    }
-
-    try {
-      setLoading(true)
-
-      // 清空结果前先销毁图表实例
-      if (compositeScoreChartInstanceRef.current) {
-        compositeScoreChartInstanceRef.current.dispose()
-        compositeScoreChartInstanceRef.current = null
-      }
-      if (compositeDistChartInstanceRef.current) {
-        compositeDistChartInstanceRef.current.dispose()
-        compositeDistChartInstanceRef.current = null
-      }
-
-      setCompositeResult(null)
-
-      const response = await axios.post('/api/portfolio/composite-score', requestData)
-
-      if (response.data.success) {
-        const data = response.data.data
-        setCompositeResult(data)
-
-        // 计算统计指标
-        const values = data.values || []
-        if (values.length > 0) {
-          const mean = values.reduce((a: number, b: number) => a + b, 0) / values.length
-          const variance = values.reduce((a: number, b: number) => a + Math.pow(b - mean, 2), 0) / values.length
-          const std = Math.sqrt(variance)
-          const min = Math.min(...values)
-          const max = Math.max(...values)
-
-          setCompositeStats({
-            mean: mean.toFixed(4),
-            std: std.toFixed(4),
-            min: min.toFixed(4),
-            max: max.toFixed(4)
-          })
-        }
-
-        message.success('综合得分计算完成')
-
-        // 延迟渲染图表
-        setTimeout(() => {
-          updateCompositeScoreChart(data)
-          updateCompositeDistChart(data.values || [])
-        }, 300)
-      } else {
-        message.error(response.data.message || '计算失败')
-      }
-    } catch (error: any) {
-      console.error('综合得分计算失败:', error)
-      message.error('综合得分计算失败: ' + (error.message || '未知错误'))
-    } finally {
-      setLoading(false)
     }
   }
 
@@ -722,17 +676,6 @@ ${factorNames.map(name => `    ${name}: ${(weights[name] * 100).toFixed(2)}%`).j
               ]
             }
           }
-        }
-      ],
-      dataZoom: [
-        {
-          type: 'inside',
-          start: 0,
-          end: 100
-        },
-        {
-          start: 0,
-          end: 100
         }
       ]
     }
@@ -822,27 +765,25 @@ ${factorNames.map(name => `    ${name}: ${(weights[name] * 100).toFixed(2)}%`).j
 
   // 运行方法对比
   const runMethodComparison = async (values: any) => {
+    console.log('[runMethodComparison] Form values:', values)
+
     const selectedFactors = values.compare_factors || []
     const selectedMethods = values.compare_methods || []
 
-    if (selectedFactors.length < 1) {
-      message.warning('请至少选择1个因子')
-      return
-    }
-
-    if (selectedMethods.length < 2) {
-      message.warning('请至少选择2个对比方法')
-      return
-    }
+    console.log('[runMethodComparison] Selected factors:', selectedFactors)
+    console.log('[runMethodComparison] Selected methods:', selectedMethods)
+    console.log('[runMethodComparison] Date range:', values.dateRange)
 
     const [startDate, endDate] = values.dateRange
     const requestData = {
-      stock_code: values.stock_code || '000001', // 添加必需的 stock_code 字段
+      stock_code: values.stock_code || '000001',
       factors: selectedFactors,
       start_date: startDate.format('YYYY-MM-DD'),
       end_date: endDate.format('YYYY-MM-DD'),
       methods: selectedMethods
     }
+
+    console.log('[runMethodComparison] Request data:', requestData)
 
     try {
       setLoading(true)
@@ -890,8 +831,8 @@ ${factorNames.map(name => `    ${name}: ${(weights[name] * 100).toFixed(2)}%`).j
     chart.clear()
 
     const methods = Object.keys(results)
-    const returnData = methods.map(m => (results[m].return * 100).toFixed(2))
-    const sharpeData = methods.map(m => results[m].sharpe_ratio.toFixed(2))
+    const returnData = methods.map(m => ((results[m].annual_return || 0) * 100).toFixed(2))
+    const sharpeData = methods.map(m => (results[m].sharpe_ratio || 0).toFixed(2))
 
     const option = {
       title: {
@@ -903,10 +844,17 @@ ${factorNames.map(name => `    ${name}: ${(weights[name] * 100).toFixed(2)}%`).j
         trigger: 'axis',
         axisPointer: {
           type: 'shadow'
+        },
+        formatter: (params: any) => {
+          let result = params[0].name + '<br/>'
+          params.forEach((item: any) => {
+            result += `${item.marker} ${item.seriesName}: ${item.value}<br/>`
+          })
+          return result
         }
       },
       legend: {
-        data: ['收益率(%)', '夏普比率'],
+        data: ['年化IC收益率(%)', 'IR'],
         top: 30
       },
       grid: {
@@ -932,18 +880,18 @@ ${factorNames.map(name => `    ${name}: ${(weights[name] * 100).toFixed(2)}%`).j
       yAxis: [
         {
           type: 'value',
-          name: '收益率(%)',
+          name: '年化IC收益率(%)',
           position: 'left'
         },
         {
           type: 'value',
-          name: '夏普比率',
+          name: 'IR',
           position: 'right'
         }
       ],
       series: [
         {
-          name: '收益率(%)',
+          name: '年化IC收益率(%)',
           type: 'bar',
           data: returnData,
           itemStyle: {
@@ -951,12 +899,12 @@ ${factorNames.map(name => `    ${name}: ${(weights[name] * 100).toFixed(2)}%`).j
           }
         },
         {
-          name: '夏普比率',
+          name: 'IR',
           type: 'line',
           yAxisIndex: 1,
           data: sharpeData,
           itemStyle: {
-            color: '#f59e0b'
+            color: '#10b981'
           }
         }
       ]
@@ -977,14 +925,21 @@ ${factorNames.map(name => `    ${name}: ${(weights[name] * 100).toFixed(2)}%`).j
         max_return: '最大收益',
         min_variance: '最小方差'
       }
+      const annualReturn = metrics.annual_return || 0
+      const icMean = metrics.ic_mean || 0
+      const icStd = metrics.ic_std || 0
+      const ir = metrics.ir || 0
+
       return {
         key: method,
         method: methodMap[method] || method,
-        return_rate: (metrics.return * 100).toFixed(2) + '%',
-        volatility: (metrics.volatility * 100).toFixed(2) + '%',
-        sharpe_ratio: metrics.sharpe_ratio.toFixed(4),
-        return_value: metrics.return,
-        sharpe_value: metrics.sharpe_ratio
+        return_rate: (annualReturn * 100).toFixed(2) + '%',
+        volatility: (icStd * 100).toFixed(4),
+        sharpe_ratio: ir.toFixed(4),
+        return_value: annualReturn,
+        sharpe_value: ir,
+        ic_mean: icMean.toFixed(4),
+        ic_std: icStd.toFixed(4)
       }
     })
   }
@@ -996,24 +951,24 @@ ${factorNames.map(name => `    ${name}: ${(weights[name] * 100).toFixed(2)}%`).j
       key: 'method'
     },
     {
-      title: '年化收益率',
+      title: '年化IC收益率',
       dataIndex: 'return_rate',
       key: 'return_rate',
       render: (text: string, record: any) => (
-        <Tag color={record.return_value > 0.1 ? 'green' : record.return_value > 0.05 ? 'blue' : 'default'}>
+        <Tag color={record.return_value > 0.05 ? 'green' : record.return_value > 0.02 ? 'blue' : 'default'}>
           {text}
         </Tag>
       ),
       sorter: (a: any, b: any) => a.return_value - b.return_value
     },
     {
-      title: '波动率',
-      dataIndex: 'volatility',
-      key: 'volatility',
-      sorter: (a: any, b: any) => parseFloat(a.volatility) - parseFloat(b.volatility)
+      title: 'IC标准差',
+      dataIndex: 'ic_std',
+      key: 'ic_std',
+      sorter: (a: any, b: any) => parseFloat(a.ic_std) - parseFloat(b.ic_std)
     },
     {
-      title: '夏普比率',
+      title: 'IR (信息比率)',
       dataIndex: 'sharpe_ratio',
       key: 'sharpe_ratio',
       render: (text: string, record: any) => (
@@ -1418,6 +1373,31 @@ ${factorNames.map(name => `    ${name}: ${(weights[name] * 100).toFixed(2)}%`).j
                           </div>
                         )}
 
+                        <Divider />
+
+                        {/* 权重分布图表 */}
+                        <div className="chart-section" style={{ marginBottom: 24 }}>
+                          <h4 className="chart-title">因子权重分布</h4>
+                          <div
+                            ref={weightChartRef}
+                            className="chart-container"
+                            style={{ height: '350px' }}
+                          ></div>
+                        </div>
+
+                        <Divider />
+
+                        {/* 权重明细表 */}
+                        <h4 className="result-title">权重明细</h4>
+                        <Table
+                          columns={weightColumns}
+                          dataSource={getWeightTableData()}
+                          pagination={false}
+                          size="small"
+                          bordered
+                          style={{ marginBottom: 24 }}
+                        />
+
                         {/* 性能指标 */}
                         <div className="metrics-section">
                           <Row gutter={16}>
@@ -1464,17 +1444,72 @@ ${factorNames.map(name => `    ${name}: ${(weights[name] * 100).toFixed(2)}%`).j
                           </Row>
                         </div>
 
-                        <Divider />
+                        {/* 综合得分评估 */}
+                        {optimizationResult.composite_stats && (
+                          <>
+                            <Divider />
+                            <div className="metrics-section" style={{ marginBottom: 24 }}>
+                              <h4 className="chart-title" style={{ marginBottom: 16 }}>
+                                <LineChartOutlined style={{ marginRight: 8 }} />
+                                综合得分评估
+                              </h4>
+                              <Row gutter={16}>
+                                <Col span={6}>
+                                  <Statistic
+                                    title="得分均值"
+                                    value={optimizationResult.composite_stats.mean || 0}
+                                    precision={4}
+                                    valueStyle={{ color: '#3b82f6', fontWeight: 600 }}
+                                  />
+                                </Col>
+                                <Col span={6}>
+                                  <Statistic
+                                    title="得分标准差"
+                                    value={optimizationResult.composite_stats.std || 0}
+                                    precision={4}
+                                    valueStyle={{ color: '#ef4444', fontWeight: 600 }}
+                                  />
+                                </Col>
+                                <Col span={6}>
+                                  <Statistic
+                                    title="最小值"
+                                    value={optimizationResult.composite_stats.min || 0}
+                                    precision={4}
+                                  />
+                                </Col>
+                                <Col span={6}>
+                                  <Statistic
+                                    title="最大值"
+                                    value={optimizationResult.composite_stats.max || 0}
+                                    precision={4}
+                                  />
+                                </Col>
+                              </Row>
+                            </div>
 
-                        {/* 权重分布图表 */}
-                        <div className="chart-section" style={{ marginBottom: 24 }}>
-                          <h4 className="chart-title">因子权重分布</h4>
-                          <div
-                            ref={weightChartRef}
-                            className="chart-container"
-                            style={{ height: '350px' }}
-                          ></div>
-                        </div>
+                            {/* 综合得分时序图 */}
+                            {optimizationResult.composite_score && optimizationResult.composite_score.values && (
+                              <>
+                                <div className="chart-section" style={{ marginBottom: 24 }}>
+                                  <div
+                                    ref={compositeScoreChartRef}
+                                    className="chart-container"
+                                    style={{ height: '300px' }}
+                                  ></div>
+                                </div>
+
+                                {/* 综合得分分布图 */}
+                                <div className="chart-section">
+                                  <div
+                                    ref={compositeDistChartRef}
+                                    className="chart-container"
+                                    style={{ height: '250px' }}
+                                  ></div>
+                                </div>
+                              </>
+                            )}
+                          </>
+                        )}
 
                         {/* 收敛曲线 */}
                         {optimizationResult.weights_history &&
@@ -1494,18 +1529,6 @@ ${factorNames.map(name => `    ${name}: ${(weights[name] * 100).toFixed(2)}%`).j
                               </div>
                             </>
                           )}
-
-                        <Divider />
-
-                        {/* 权重明细表 */}
-                        <h4 className="result-title">权重明细</h4>
-                        <Table
-                          columns={weightColumns}
-                          dataSource={getWeightTableData()}
-                          pagination={false}
-                          size="small"
-                          bordered
-                        />
                       </div>
                     )}
                   </Card>
@@ -1513,213 +1536,7 @@ ${factorNames.map(name => `    ${name}: ${(weights[name] * 100).toFixed(2)}%`).j
               </Row>
             </Tabs.TabPane>
 
-            {/* Tab 2: 综合得分 */}
-            <Tabs.TabPane
-              tab={
-                <span>
-                  <LineChartOutlined />
-                  综合得分
-                </span>
-              }
-              key="composite"
-            >
-              <Row gutter={[24, 24]}>
-                {/* 左侧配置面板 */}
-                <Col xs={24} lg={8}>
-                  <Card title="综合得分配置" className="config-card">
-                    <Form
-                      form={optimizeForm}
-                      layout="vertical"
-                      onFinish={runCompositeScore}
-                    >
-                      <Divider style={{ fontSize: '13px', fontWeight: 600, color: '#0f172a' }}>
-                        因子选择
-                      </Divider>
-                      <p className="text-hint">选择用于计算综合得分的因子（至少1个）</p>
-
-                      <Form.Item
-                        name="composite_factors"
-                        rules={[{ required: true, message: '请至少选择1个因子' }]}
-                      >
-                        <Select
-                          mode="multiple"
-                          placeholder="输入因子名称搜索"
-                          style={{ width: '100%' }}
-                          showSearch
-                          filterOption={(input, option) => {
-                            const label = String(option?.label ?? '')
-                            const value = String(option?.value ?? '')
-                            return (
-                              label.toLowerCase().includes(input.toLowerCase()) ||
-                              value.toLowerCase().includes(input.toLowerCase())
-                            )
-                          }}
-                          optionLabelProp="label"
-                          maxTagCount="responsive"
-                          size="large"
-                        >
-                          {factors.map((factor) => (
-                            <Option
-                              key={factor.id}
-                              value={factor.name}
-                              label={factor.name}
-                            >
-                              <div
-                                style={{
-                                  display: 'flex',
-                                  flexDirection: 'column',
-                                  gap: 4
-                                }}
-                              >
-                                <div
-                                  style={{
-                                    display: 'flex',
-                                    alignItems: 'center',
-                                    gap: 8
-                                  }}
-                                >
-                                  <span style={{ fontWeight: 500 }}>
-                                    {factor.name}
-                                  </span>
-                                  <Tag
-                                    color={
-                                      factor.source === 'preset'
-                                        ? 'success'
-                                        : 'warning'
-                                    }
-                                  >
-                                    {factor.source === 'preset' ? '预置' : '自定义'}
-                                  </Tag>
-                                  <Tag color="blue">{factor.category}</Tag>
-                                </div>
-                              </div>
-                            </Option>
-                          ))}
-                        </Select>
-                      </Form.Item>
-
-                      {/* 股票代码 */}
-                      <Divider style={{ fontSize: '13px', fontWeight: 600, color: '#0f172a' }}>
-                        股票代码
-                      </Divider>
-                      <Form.Item
-                        name="stock_code"
-                        label="股票代码"
-                        initialValue="000001"
-                        rules={[{ required: true, message: '请输入股票代码' }]}
-                      >
-                        <Input placeholder="例如: 000001" />
-                      </Form.Item>
-
-                      <Divider style={{ fontSize: '13px', fontWeight: 600, color: '#0f172a' }}>
-                        数据范围
-                      </Divider>
-
-                      <Form.Item
-                        label="日期范围"
-                        name="dateRange"
-                        rules={[{ required: true, message: '请选择日期范围' }]}
-                      >
-                        <RangePicker style={{ width: '100%' }} />
-                      </Form.Item>
-
-                      <Form.Item>
-                        <Button
-                          type="primary"
-                          htmlType="submit"
-                          icon={<LineChartOutlined />}
-                          loading={loading}
-                          block
-                          size="large"
-                        >
-                          计算综合得分
-                        </Button>
-                      </Form.Item>
-                    </Form>
-                  </Card>
-                </Col>
-
-                {/* 右侧结果展示 */}
-                <Col xs={24} lg={16}>
-                  <Card title="综合得分结果" className="result-card">
-                    {!compositeResult && (
-                      <div className="placeholder-content">
-                        <LineChartOutlined className="placeholder-icon" />
-                        <p className="placeholder-text">
-                          选择因子后点击"计算综合得分"
-                        </p>
-                      </div>
-                    )}
-
-                    {compositeResult && (
-                      <div className="composite-result">
-                        {/* 统计指标 */}
-                        <div className="metrics-section" style={{ marginBottom: 24 }}>
-                          <Row gutter={16}>
-                            <Col span={6}>
-                              <Statistic
-                                title="均值"
-                                value={compositeStats?.mean || 0}
-                                precision={4}
-                                valueStyle={{ color: '#3b82f6', fontWeight: 600 }}
-                              />
-                            </Col>
-                            <Col span={6}>
-                              <Statistic
-                                title="标准差"
-                                value={compositeStats?.std || 0}
-                                precision={4}
-                                valueStyle={{ color: '#ef4444', fontWeight: 600 }}
-                              />
-                            </Col>
-                            <Col span={6}>
-                              <Statistic
-                                title="最小值"
-                                value={compositeStats?.min || 0}
-                                precision={4}
-                              />
-                            </Col>
-                            <Col span={6}>
-                              <Statistic
-                                title="最大值"
-                                value={compositeStats?.max || 0}
-                                precision={4}
-                              />
-                            </Col>
-                          </Row>
-                        </div>
-
-                        <Divider />
-
-                        {/* 得分时序图 */}
-                        <div className="chart-section" style={{ marginBottom: 24 }}>
-                          <h4 className="chart-title">综合得分时序图</h4>
-                          <div
-                            ref={compositeScoreChartRef}
-                            className="chart-container"
-                            style={{ height: '350px' }}
-                          ></div>
-                        </div>
-
-                        <Divider />
-
-                        {/* 得分分布图 */}
-                        <div className="chart-section">
-                          <h4 className="chart-title">得分分布直方图</h4>
-                          <div
-                            ref={compositeDistChartRef}
-                            className="chart-container"
-                            style={{ height: '300px' }}
-                          ></div>
-                        </div>
-                      </div>
-                    )}
-                  </Card>
-                </Col>
-              </Row>
-            </Tabs.TabPane>
-
-            {/* Tab 3: 方法对比 */}
+            {/* Tab 2: 方法对比 */}
             <Tabs.TabPane
               tab={
                 <span>
@@ -1734,7 +1551,7 @@ ${factorNames.map(name => `    ${name}: ${(weights[name] * 100).toFixed(2)}%`).j
                 <Col xs={24} lg={8}>
                   <Card title="方法对比配置" className="config-card">
                     <Form
-                      form={optimizeForm}
+                      form={compareForm}
                       layout="vertical"
                       onFinish={runMethodComparison}
                     >
@@ -1745,7 +1562,17 @@ ${factorNames.map(name => `    ${name}: ${(weights[name] * 100).toFixed(2)}%`).j
 
                       <Form.Item
                         name="compare_factors"
-                        rules={[{ required: true, message: '请至少选择1个因子' }]}
+                        rules={[
+                          { required: true, message: '请至少选择1个因子' },
+                          {
+                            validator: (_, value) => {
+                              if (!value || value.length < 1) {
+                                return Promise.reject('请至少选择1个因子')
+                              }
+                              return Promise.resolve()
+                            }
+                          }
+                        ]}
                       >
                         <Select
                           mode="multiple"
@@ -1798,10 +1625,78 @@ ${factorNames.map(name => `    ${name}: ${(weights[name] * 100).toFixed(2)}%`).j
                                   </Tag>
                                   <Tag color="blue">{factor.category}</Tag>
                                 </div>
+                                <div
+                                  style={{
+                                    fontSize: 12,
+                                    color: '#64748b',
+                                    fontFamily: 'monospace'
+                                  }}
+                                >
+                                  {factor.code}
+                                </div>
+                                {factor.description && (
+                                  <div
+                                    style={{
+                                      fontSize: 12,
+                                      color: '#94a3b8'
+                                    }}
+                                  >
+                                    {factor.description}
+                                  </div>
+                                )}
                               </div>
                             </Option>
                           ))}
                         </Select>
+                      </Form.Item>
+
+                      <Form.Item noStyle shouldUpdate>
+                        {() => {
+                          const selectedCount =
+                            compareForm.getFieldValue('compare_factors')?.length || 0
+                          return (
+                            <div
+                              style={{
+                                display: 'flex',
+                                justifyContent: 'space-between',
+                                alignItems: 'center',
+                                marginBottom: 16
+                              }}
+                            >
+                              <span className="text-hint">
+                                已选择{' '}
+                                <strong style={{ color: '#3b82f6' }}>
+                                  {selectedCount}
+                                </strong>{' '}
+                                个因子
+                              </span>
+                              <Space size="small">
+                                <Button
+                                  type="link"
+                                  size="small"
+                                  onClick={() => {
+                                    compareForm.setFieldsValue({
+                                      compare_factors: factors.map((f) => f.name)
+                                    })
+                                  }}
+                                >
+                                  全选
+                                </Button>
+                                <Button
+                                  type="link"
+                                  size="small"
+                                  onClick={() => {
+                                    compareForm.setFieldsValue({
+                                      compare_factors: []
+                                    })
+                                  }}
+                                >
+                                  清空
+                                </Button>
+                              </Space>
+                            </div>
+                          )
+                        }}
                       </Form.Item>
 
                       {/* 股票代码 */}
@@ -1824,6 +1719,7 @@ ${factorNames.map(name => `    ${name}: ${(weights[name] * 100).toFixed(2)}%`).j
                       <Form.Item
                         label="日期范围"
                         name="dateRange"
+                        initialValue={[dayjs().subtract(1, 'year'), dayjs()]}
                         rules={[{ required: true, message: '请选择日期范围' }]}
                       >
                         <RangePicker style={{ width: '100%' }} />
@@ -1836,7 +1732,17 @@ ${factorNames.map(name => `    ${name}: ${(weights[name] * 100).toFixed(2)}%`).j
 
                       <Form.Item
                         name="compare_methods"
-                        rules={[{ required: true, message: '请至少选择2个方法' }]}
+                        rules={[
+                          { required: true, message: '请至少选择2个方法' },
+                          {
+                            validator: (_, value) => {
+                              if (!value || value.length < 2) {
+                                return Promise.reject('请至少选择2个方法')
+                              }
+                              return Promise.resolve()
+                            }
+                          }
+                        ]}
                       >
                         <Select
                           mode="multiple"
@@ -1851,6 +1757,63 @@ ${factorNames.map(name => `    ${name}: ${(weights[name] * 100).toFixed(2)}%`).j
                           <Option value="max_return">最大收益</Option>
                           <Option value="min_variance">最小方差</Option>
                         </Select>
+                      </Form.Item>
+
+                      <Form.Item noStyle shouldUpdate>
+                        {() => {
+                          const selectedMethods =
+                            compareForm.getFieldValue('compare_methods') || []
+                          const methodNames = {
+                            equal_weight: '等权重',
+                            ic_weight: 'IC加权',
+                            ir_weight: 'IR加权',
+                            max_sharpe: '最大夏普',
+                            max_return: '最大收益',
+                            min_variance: '最小方差'
+                          }
+                          return (
+                            <div
+                              style={{
+                                display: 'flex',
+                                justifyContent: 'space-between',
+                                alignItems: 'center',
+                                marginBottom: 16
+                              }}
+                            >
+                              <span className="text-hint">
+                                已选择{' '}
+                                <strong style={{ color: '#3b82f6' }}>
+                                  {selectedMethods.length}
+                                </strong>{' '}
+                                个方法
+                              </span>
+                              <Space size="small">
+                                <Button
+                                  type="link"
+                                  size="small"
+                                  onClick={() => {
+                                    compareForm.setFieldsValue({
+                                      compare_methods: ['equal_weight', 'ic_weight', 'ir_weight', 'max_sharpe', 'max_return', 'min_variance']
+                                    })
+                                  }}
+                                >
+                                  全选
+                                </Button>
+                                <Button
+                                  type="link"
+                                  size="small"
+                                  onClick={() => {
+                                    compareForm.setFieldsValue({
+                                      compare_methods: []
+                                    })
+                                  }}
+                                >
+                                  清空
+                                </Button>
+                              </Space>
+                            </div>
+                          )
+                        }}
                       </Form.Item>
 
                       <Form.Item>

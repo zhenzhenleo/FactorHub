@@ -230,6 +230,10 @@ class AnalysisService:
             factor_data[stock_code]["future_return_1"] = factor_data[stock_code]["close"].pct_change(1).shift(-1)
             factor_data[stock_code]["future_return_5"] = factor_data[stock_code]["close"].pct_change(5).shift(-5)
 
+            # 清理无穷大值和NaN值
+            for col in factor_data[stock_code].columns:
+                factor_data[stock_code][col] = factor_data[stock_code][col].replace([np.inf, -np.inf], np.nan)
+
         # 判断是单股票还是多股票
         is_single_stock = len(factor_data) == 1
 
@@ -256,8 +260,13 @@ class AnalysisService:
             factor_values = df[factor_name]
             return_values = df["future_return_1"]
 
-            # 移除NaN
-            valid_mask = factor_values.notna() & return_values.notna()
+            # 移除NaN和无穷大值
+            valid_mask = (
+                factor_values.notna() &
+                return_values.notna() &
+                ~np.isinf(factor_values) &
+                ~np.isinf(return_values)
+            )
             factor_clean = factor_values[valid_mask]
             return_clean = return_values[valid_mask]
 
@@ -267,8 +276,8 @@ class AnalysisService:
             # 计算滚动相关性（窗口大小20）
             rolling_ic = factor_clean.rolling(window=20).corr(return_clean)
 
-            # 移除NaN
-            rolling_ic = rolling_ic.dropna()
+            # 移除NaN和无穷大值
+            rolling_ic = rolling_ic.replace([np.inf, -np.inf], np.nan).dropna()
 
             if len(rolling_ic) > 0:
                 ic_series[factor_name] = rolling_ic
@@ -334,13 +343,14 @@ class AnalysisService:
                     if stock_code in factor_data and date in factor_data[stock_code].index:
                         factor_val = factor_data[stock_code].loc[date, factor_name]
                         return_val = factor_data[stock_code].loc[date, "future_return_1"]
-                        if pd.notna(factor_val) and pd.notna(return_val):
+                        # 检查非NaN且非无穷大
+                        if pd.notna(factor_val) and pd.notna(return_val) and not np.isinf(factor_val) and not np.isinf(return_val):
                             factor_values.append(factor_val)
                             return_values.append(return_val)
 
                 if len(factor_values) >= 2:
                     ic = pd.Series(factor_values).corr(pd.Series(return_values))
-                    if pd.notna(ic):
+                    if pd.notna(ic) and not np.isinf(ic):
                         ics.append(ic)
                         dates.append(date)
 

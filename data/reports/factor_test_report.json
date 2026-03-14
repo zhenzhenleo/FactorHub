@@ -1,0 +1,1554 @@
+{
+  "calculation": {
+    "distance_to_high_20": {
+      "factor_name": "distance_to_high_20",
+      "success": true,
+      "valid_points": 242,
+      "nan_points": 0,
+      "inf_points": 0,
+      "mean": 0.036334832649298,
+      "std": 0.024048108572016457
+    },
+    "distance_to_low_20": {
+      "factor_name": "distance_to_low_20",
+      "success": true,
+      "valid_points": 242,
+      "nan_points": 0,
+      "inf_points": 0,
+      "mean": 0.03324664186719798,
+      "std": 0.02801622697211603
+    },
+    "percentile_20": {
+      "factor_name": "percentile_20",
+      "success": true,
+      "valid_points": 223,
+      "nan_points": 19,
+      "inf_points": 0,
+      "mean": 0.46970199596812184,
+      "std": 0.3639700919873921
+    },
+    "percentile_60": {
+      "factor_name": "percentile_60",
+      "success": true,
+      "valid_points": 183,
+      "nan_points": 59,
+      "inf_points": 0,
+      "mean": 0.42541616470506843,
+      "std": 0.3197024267868043
+    },
+    "price_range_ratio_20": {
+      "factor_name": "price_range_ratio_20",
+      "success": true,
+      "valid_points": 242,
+      "nan_points": 0,
+      "inf_points": 0,
+      "mean": 0.4543254616287119,
+      "std": 0.3025751673397763
+    },
+    "close_open_ratio": {
+      "factor_name": "close_open_ratio",
+      "success": true,
+      "valid_points": 242,
+      "nan_points": 0,
+      "inf_points": 0,
+      "mean": 1.0006987397216516,
+      "std": 0.008805271131726002
+    },
+    "close_open_ratio_1": null,
+    "high_low_ratio": {
+      "factor_name": "high_low_ratio",
+      "success": true,
+      "valid_points": 242,
+      "nan_points": 0,
+      "inf_points": 0,
+      "mean": 0.013446883407358156,
+      "std": 0.006693409902921724
+    },
+    "log_return_1": {
+      "factor_name": "log_return_1",
+      "success": true,
+      "valid_points": 241,
+      "nan_points": 1,
+      "inf_points": 0,
+      "mean": -0.00016376350860579893,
+      "std": 0.00978802042734287
+    },
+    "log_return_5": {
+      "factor_name": "log_return_5",
+      "success": true,
+      "valid_points": 237,
+      "nan_points": 5,
+      "inf_points": 0,
+      "mean": -0.000275402752114313,
+      "std": 0.019387573465047547
+    },
+    "price_vs_sma20": {
+      "factor_name": "price_vs_sma20",
+      "success": true,
+      "valid_points": 223,
+      "nan_points": 19,
+      "inf_points": 0,
+      "mean": 1.001168155967396,
+      "std": 0.0229174716745083
+    },
+    "price_vs_sma60": {
+      "factor_name": "price_vs_sma60",
+      "success": true,
+      "valid_points": 183,
+      "nan_points": 59,
+      "inf_points": 0,
+      "mean": 1.004120101707209,
+      "std": 0.04999298383112465
+    },
+    "sma20_vs_sma60": {
+      "factor_name": "sma20_vs_sma60",
+      "success": true,
+      "valid_points": 183,
+      "nan_points": 59,
+      "inf_points": 0,
+      "mean": 1.0045943180082049,
+      "std": 0.03466972950854204
+    },
+    "momentum_20": {
+      "factor_name": "momentum_20",
+      "success": true,
+      "valid_points": 222,
+      "nan_points": 20,
+      "inf_points": 0,
+      "mean": 0.0025718246304270733,
+      "std": 0.04488060519548424
+    },
+    "momentum_60": {
+      "factor_name": "momentum_60",
+      "success": true,
+      "valid_points": 182,
+      "nan_points": 60,
+      "inf_points": 0,
+      "mean": 0.01652789120861249,
+      "std": 0.08680627207542278
+    },
+    "momentum_acceleration": {
+      "factor_name": "momentum_acceleration",
+      "success": true,
+      "valid_points": 222,
+      "nan_points": 20,
+      "inf_points": 0,
+      "mean": 0.001160441087916483,
+      "std": 0.03532440175701257
+    },
+    "price_momentum_strength": {
+      "factor_name": "price_momentum_strength",
+      "success": true,
+      "valid_points": 223,
+      "nan_points": 19,
+      "inf_points": 0,
+      "mean": 0.057217961902177546,
+      "std": 1.8139174384541505
+    },
+    "adx_14": {
+      "factor_name": "adx_14",
+      "success": true,
+      "valid_points": 215,
+      "nan_points": 27,
+      "inf_points": 0,
+      "mean": 29.432954171399377,
+      "std": 13.140513140557475
+    },
+    "cci_20": {
+      "factor_name": "cci_20",
+      "success": true,
+      "valid_points": 223,
+      "nan_points": 19,
+      "inf_points": 0,
+      "mean": -3.473589421266315,
+      "std": 112.1422970056174
+    },
+    "macd_hist": {
+      "factor_name": "macd_hist",
+      "success": true,
+      "valid_points": 209,
+      "nan_points": 33,
+      "inf_points": 0,
+      "mean": 0.001999690647858401,
+      "std": 0.037625698436639585
+    },
+    "macd_line": {
+      "factor_name": "macd_line",
+      "success": true,
+      "valid_points": 209,
+      "nan_points": 33,
+      "inf_points": 0,
+      "mean": 0.010226792373381009,
+      "std": 0.1352928809465174
+    },
+    "macd_signal": {
+      "factor_name": "macd_signal",
+      "success": true,
+      "valid_points": 209,
+      "nan_points": 33,
+      "inf_points": 0,
+      "mean": 0.008227101725522606,
+      "std": 0.13081309795775262
+    },
+    "roc_10": {
+      "factor_name": "roc_10",
+      "success": true,
+      "valid_points": 232,
+      "nan_points": 10,
+      "inf_points": 0,
+      "mean": 9.535788400590433e-05,
+      "std": 0.02858089038439643
+    },
+    "rsi_14": {
+      "factor_name": "rsi_14",
+      "success": true,
+      "valid_points": 228,
+      "nan_points": 14,
+      "inf_points": 0,
+      "mean": 48.13671714757958,
+      "std": 13.425790544484608
+    },
+    "deviation_from_ma20": {
+      "factor_name": "deviation_from_ma20",
+      "success": true,
+      "valid_points": 223,
+      "nan_points": 19,
+      "inf_points": 0,
+      "mean": 0.0011681559673960055,
+      "std": 0.022917471674508305
+    },
+    "deviation_from_ma60": {
+      "factor_name": "deviation_from_ma60",
+      "success": true,
+      "valid_points": 183,
+      "nan_points": 59,
+      "inf_points": 0,
+      "mean": 0.004120101707209107,
+      "std": 0.04999298383112465
+    },
+    "reversal_10": {
+      "factor_name": "reversal_10",
+      "success": true,
+      "valid_points": 232,
+      "nan_points": 10,
+      "inf_points": 0,
+      "mean": -9.535788400590576e-05,
+      "std": 0.028580890384396433
+    },
+    "reversal_5": {
+      "factor_name": "reversal_5",
+      "success": true,
+      "valid_points": 237,
+      "nan_points": 5,
+      "inf_points": 0,
+      "mean": 8.807151153692082e-05,
+      "std": 0.019416488128385402
+    },
+    "stochastic_d": {
+      "factor_name": "stochastic_d",
+      "success": true,
+      "valid_points": 240,
+      "nan_points": 2,
+      "inf_points": 0,
+      "mean": 45.94722634841359,
+      "std": 28.88997522544341
+    },
+    "stochastic_k": {
+      "factor_name": "stochastic_k",
+      "success": true,
+      "valid_points": 242,
+      "nan_points": 0,
+      "inf_points": 0,
+      "mean": 46.138225783028595,
+      "std": 30.69513500724419
+    },
+    "ema12": {
+      "factor_name": "ema12",
+      "success": true,
+      "valid_points": 231,
+      "nan_points": 11,
+      "inf_points": 0,
+      "mean": 11.380074715637006,
+      "std": 0.515655113656813
+    },
+    "ema26": {
+      "factor_name": "ema26",
+      "success": true,
+      "valid_points": 217,
+      "nan_points": 25,
+      "inf_points": 0,
+      "mean": 11.421942399201214,
+      "std": 0.4477220699750709
+    },
+    "ma10": {
+      "factor_name": "ma10",
+      "success": true,
+      "valid_points": 233,
+      "nan_points": 9,
+      "inf_points": 0,
+      "mean": 11.374085836909869,
+      "std": 0.5335110616895331
+    },
+    "ma120": {
+      "factor_name": "ma120",
+      "success": true,
+      "valid_points": 123,
+      "nan_points": 119,
+      "inf_points": 0,
+      "mean": 11.568726964769658,
+      "std": 0.1334333441947298
+    },
+    "ma20": {
+      "factor_name": "ma20",
+      "success": true,
+      "valid_points": 223,
+      "nan_points": 19,
+      "inf_points": 0,
+      "mean": 11.399316143497762,
+      "std": 0.5123584905135051
+    },
+    "ma5": {
+      "factor_name": "ma5",
+      "success": true,
+      "valid_points": 238,
+      "nan_points": 4,
+      "inf_points": 0,
+      "mean": 11.363336134453775,
+      "std": 0.5406432296133625
+    },
+    "ma60": {
+      "factor_name": "ma60",
+      "success": true,
+      "valid_points": 183,
+      "nan_points": 59,
+      "inf_points": 0,
+      "mean": 11.521122040072859,
+      "std": 0.31835331186942706
+    },
+    "ma_bias_10_60": {
+      "factor_name": "ma_bias_10_60",
+      "success": true,
+      "valid_points": 183,
+      "nan_points": 59,
+      "inf_points": 0,
+      "mean": 0.004550332485082711,
+      "std": 0.04303282079518974
+    },
+    "ma_bias_5_20": {
+      "factor_name": "ma_bias_5_20",
+      "success": true,
+      "valid_points": 223,
+      "nan_points": 19,
+      "inf_points": 0,
+      "mean": 0.0005721796190217743,
+      "std": 0.018139174384541507
+    },
+    "ma_multi_align": {
+      "factor_name": "ma_multi_align",
+      "success": true,
+      "valid_points": 242,
+      "nan_points": 0,
+      "inf_points": 0,
+      "mean": 1.243801652892562,
+      "std": 1.047850402833939
+    },
+    "price_change_1": {
+      "factor_name": "price_change_1",
+      "success": true,
+      "valid_points": 241,
+      "nan_points": 1,
+      "inf_points": 0,
+      "mean": -0.0001161792080902501,
+      "std": 0.00974906521289217
+    },
+    "price_change_5": {
+      "factor_name": "price_change_5",
+      "success": true,
+      "valid_points": 237,
+      "nan_points": 5,
+      "inf_points": 0,
+      "mean": -8.807151153691542e-05,
+      "std": 0.01941648812838541
+    },
+    "volatility_change": {
+      "factor_name": "volatility_change",
+      "success": true,
+      "valid_points": 227,
+      "nan_points": 15,
+      "inf_points": 0,
+      "mean": 2.3209952337569713e-05,
+      "std": 0.00393183089024918
+    },
+    "volume_shrink": {
+      "factor_name": "volume_shrink",
+      "success": true,
+      "valid_points": 242,
+      "nan_points": 0,
+      "inf_points": 0,
+      "mean": 0.09504132231404959,
+      "std": 0.2938798240479883
+    },
+    "volume_surge": {
+      "factor_name": "volume_surge",
+      "success": true,
+      "valid_points": 242,
+      "nan_points": 0,
+      "inf_points": 0,
+      "mean": 0.045454545454545456,
+      "std": 0.2087306032432486
+    },
+    "obv": {
+      "factor_name": "obv",
+      "success": true,
+      "valid_points": 242,
+      "nan_points": 0,
+      "inf_points": 0,
+      "mean": 337874843.9752066,
+      "std": 654290823.8756776
+    },
+    "obv_slope": {
+      "factor_name": "obv_slope",
+      "success": true,
+      "valid_points": 237,
+      "nan_points": 5,
+      "inf_points": 0,
+      "mean": -221485.7088607595,
+      "std": 253203721.11010185
+    },
+    "volume_ma_ratio": {
+      "factor_name": "volume_ma_ratio",
+      "success": true,
+      "valid_points": 233,
+      "nan_points": 9,
+      "inf_points": 0,
+      "mean": 0.9996235992746222,
+      "std": 0.31717561364997887
+    },
+    "death_cross": {
+      "factor_name": "death_cross",
+      "success": true,
+      "valid_points": 242,
+      "nan_points": 0,
+      "inf_points": 0,
+      "mean": 0.02066115702479339,
+      "std": 0.14254204031354056
+    },
+    "gap_down": {
+      "factor_name": "gap_down",
+      "success": true,
+      "valid_points": 242,
+      "nan_points": 0,
+      "inf_points": 0,
+      "mean": 0.008264462809917356,
+      "std": 0.0907202867781662
+    },
+    "gap_up": {
+      "factor_name": "gap_up",
+      "success": true,
+      "valid_points": 242,
+      "nan_points": 0,
+      "inf_points": 0,
+      "mean": 0.004132231404958678,
+      "std": 0.06428243465332252
+    },
+    "golden_cross": {
+      "factor_name": "golden_cross",
+      "success": true,
+      "valid_points": 242,
+      "nan_points": 0,
+      "inf_points": 0,
+      "mean": 0.02066115702479339,
+      "std": 0.14254204031354056
+    },
+    "new_high_20": {
+      "factor_name": "new_high_20",
+      "success": true,
+      "valid_points": 242,
+      "nan_points": 0,
+      "inf_points": 0,
+      "mean": 0.0,
+      "std": 0.0
+    },
+    "new_low_20": {
+      "factor_name": "new_low_20",
+      "success": true,
+      "valid_points": 242,
+      "nan_points": 0,
+      "inf_points": 0,
+      "mean": 0.0,
+      "std": 0.0
+    },
+    "three_falling_candles": {
+      "factor_name": "three_falling_candles",
+      "success": true,
+      "valid_points": 242,
+      "nan_points": 0,
+      "inf_points": 0,
+      "mean": 0.07851239669421488,
+      "std": 0.26953367184940374
+    },
+    "three_rising_candles": {
+      "factor_name": "three_rising_candles",
+      "success": true,
+      "valid_points": 242,
+      "nan_points": 0,
+      "inf_points": 0,
+      "mean": 0.11570247933884298,
+      "std": 0.3205307487694284
+    },
+    "Mined_Factor_1": {
+      "factor_name": "Mined_Factor_1",
+      "success": true,
+      "valid_points": 228,
+      "nan_points": 14,
+      "inf_points": 0,
+      "mean": 0.23951262674799836,
+      "std": 0.053657600375364614
+    },
+    "test": null,
+    "atr_14": {
+      "factor_name": "atr_14",
+      "success": true,
+      "valid_points": 228,
+      "nan_points": 14,
+      "inf_points": 0,
+      "mean": 0.15967508449866558,
+      "std": 0.03577173358357641
+    },
+    "atr_norm": {
+      "factor_name": "atr_norm",
+      "success": true,
+      "valid_points": 228,
+      "nan_points": 14,
+      "inf_points": 0,
+      "mean": 0.013939309723650463,
+      "std": 0.002562690580948711
+    },
+    "bollinger_bandwidth": {
+      "factor_name": "bollinger_bandwidth",
+      "success": true,
+      "valid_points": 223,
+      "nan_points": 19,
+      "inf_points": 0,
+      "mean": 0.06105978155651621,
+      "std": 0.025689594892641207
+    },
+    "bollinger_position": {
+      "factor_name": "bollinger_position",
+      "success": true,
+      "valid_points": 223,
+      "nan_points": 19,
+      "inf_points": 0,
+      "mean": 0.49287808316680337,
+      "std": 0.3376836586998324
+    },
+    "volatility_10": {
+      "factor_name": "volatility_10",
+      "success": true,
+      "valid_points": 232,
+      "nan_points": 10,
+      "inf_points": 0,
+      "mean": 0.008883257619264392,
+      "std": 0.0037870458698281164
+    },
+    "组合因子_最大夏普": null,
+    "is_bullish_candle": {
+      "factor_name": "is_bullish_candle",
+      "success": true,
+      "valid_points": 242,
+      "nan_points": 0,
+      "inf_points": 0,
+      "mean": 0.49173553719008267,
+      "std": 0.5009678229634424
+    },
+    "regime_trend": {
+      "factor_name": "regime_trend",
+      "success": true,
+      "valid_points": 242,
+      "nan_points": 0,
+      "inf_points": 0,
+      "mean": 0.19421487603305784,
+      "std": 0.39641495520129655
+    },
+    "regime_volatility": {
+      "factor_name": "regime_volatility",
+      "success": true,
+      "valid_points": 242,
+      "nan_points": 0,
+      "inf_points": 0,
+      "mean": 0.2892561983471074,
+      "std": 0.45435680732647854
+    },
+    "123": null,
+    "EMA12": {
+      "factor_name": "EMA12",
+      "success": true,
+      "valid_points": 231,
+      "nan_points": 11,
+      "inf_points": 0,
+      "mean": 11.380074715637006,
+      "std": 0.515655113656813
+    },
+    "Mined_close_open_ratio_1": {
+      "factor_name": "Mined_close_open_ratio_1",
+      "success": true,
+      "valid_points": 242,
+      "nan_points": 0,
+      "inf_points": 0,
+      "mean": 7.17976711784694,
+      "std": 0.27436769618019535
+    },
+    "SMA20": {
+      "factor_name": "SMA20",
+      "success": true,
+      "valid_points": 223,
+      "nan_points": 19,
+      "inf_points": 0,
+      "mean": 11.399316143497762,
+      "std": 0.5123584905135051
+    },
+    "test_history_factor": {
+      "factor_name": "test_history_factor",
+      "success": true,
+      "valid_points": 242,
+      "nan_points": 0,
+      "inf_points": 0,
+      "mean": 11.357438016528926,
+      "std": 0.5461141931041003
+    },
+    "test_rollback_factor": {
+      "factor_name": "test_rollback_factor",
+      "success": false,
+      "error": "因子表达式计算失败: name 'v2_code' is not defined"
+    },
+    "test_version_factor": {
+      "factor_name": "test_version_factor",
+      "success": true,
+      "valid_points": 223,
+      "nan_points": 19,
+      "inf_points": 0,
+      "mean": 1.001168155967396,
+      "std": 0.0229174716745083
+    },
+    "一周趋势预测因子": null,
+    "拐点预测因子": null,
+    "趋势预测因子": null,
+    "force_index": {
+      "factor_name": "force_index",
+      "success": true,
+      "valid_points": 241,
+      "nan_points": 1,
+      "inf_points": 0,
+      "mean": -688107.4802904539,
+      "std": 23912522.653541267
+    },
+    "force_index_ma": {
+      "factor_name": "force_index_ma",
+      "success": true,
+      "valid_points": 229,
+      "nan_points": 13,
+      "inf_points": 0,
+      "mean": 139499.54879744689,
+      "std": 5019134.809531056
+    },
+    "money_flow": {
+      "factor_name": "money_flow",
+      "success": true,
+      "valid_points": 242,
+      "nan_points": 0,
+      "inf_points": 0,
+      "mean": -10701304.256549602,
+      "std": 1361720038.5103135
+    },
+    "money_flow_ma": {
+      "factor_name": "money_flow_ma",
+      "success": true,
+      "valid_points": 238,
+      "nan_points": 4,
+      "inf_points": 0,
+      "mean": -3996005.632123707,
+      "std": 606068056.37436
+    },
+    "price_vwma_ratio": {
+      "factor_name": "price_vwma_ratio",
+      "success": true,
+      "valid_points": 242,
+      "nan_points": 0,
+      "inf_points": 0,
+      "mean": 0.9987707848080668,
+      "std": 0.02231863002539925
+    },
+    "vwma_20": {
+      "factor_name": "vwma_20",
+      "success": true,
+      "valid_points": 242,
+      "nan_points": 0,
+      "inf_points": 0,
+      "mean": 11.373022826919856,
+      "std": 0.5202730406028815
+    },
+    "Mined_Factor_10_20260313_000001": null,
+    "Mined_Factor_1_20260313204808_000001": {
+      "factor_name": "Mined_Factor_1_20260313204808_000001",
+      "success": true,
+      "valid_points": 241,
+      "nan_points": 0,
+      "inf_points": 1,
+      "mean": -3.6174617824421142,
+      "std": 0.9056033509608514
+    },
+    "Mined_Factor_1_20260313204814_000001": {
+      "factor_name": "Mined_Factor_1_20260313204814_000001",
+      "success": true,
+      "valid_points": 241,
+      "nan_points": 0,
+      "inf_points": 1,
+      "mean": -3.6174617824421142,
+      "std": 0.9056033509608514
+    },
+    "Mined_Factor_1_20260313204819_000001": {
+      "factor_name": "Mined_Factor_1_20260313204819_000001",
+      "success": true,
+      "valid_points": 241,
+      "nan_points": 0,
+      "inf_points": 1,
+      "mean": -3.6174617824421142,
+      "std": 0.9056033509608514
+    },
+    "Mined_Factor_20260313_1_000001": null,
+    "Mined_Factor_20260313_2_000001": null,
+    "Mined_Factor_2_20260313_000001": {
+      "factor_name": "Mined_Factor_2_20260313_000001",
+      "success": true,
+      "valid_points": 242,
+      "nan_points": 0,
+      "inf_points": 0,
+      "mean": 1.0006987397216516,
+      "std": 0.008805271131726002
+    },
+    "Mined_Factor_3_20260313_000001": {
+      "factor_name": "Mined_Factor_3_20260313_000001",
+      "success": true,
+      "valid_points": 242,
+      "nan_points": 0,
+      "inf_points": 0,
+      "mean": 0.17819078355351875,
+      "std": 0.06783725668308817
+    },
+    "Mined_Factor_4_20260313_000001": null,
+    "Mined_Factor_5_20260313_000001": null,
+    "Mined_Factor_6_20260313_000001": null,
+    "Mined_Factor_7_20260313_000001": null,
+    "Mined_Factor_8_20260313_000001": null,
+    "Mined_Factor_9_20260313_000001": null,
+    "downside_risk": {
+      "factor_name": "downside_risk",
+      "success": true,
+      "valid_points": 222,
+      "nan_points": 20,
+      "inf_points": 0,
+      "mean": 0.0052646099179254995,
+      "std": 0.0025746166064679605
+    },
+    "kurtosis_20": {
+      "factor_name": "kurtosis_20",
+      "success": true,
+      "valid_points": 222,
+      "nan_points": 20,
+      "inf_points": 0,
+      "mean": 1.2499492292301284,
+      "std": 3.3193874157369487
+    },
+    "max_drawdown_20": {
+      "factor_name": "max_drawdown_20",
+      "success": true,
+      "valid_points": 223,
+      "nan_points": 19,
+      "inf_points": 0,
+      "mean": -0.037563094385642135,
+      "std": 0.019099272231872754
+    },
+    "skewness_20": {
+      "factor_name": "skewness_20",
+      "success": true,
+      "valid_points": 222,
+      "nan_points": 20,
+      "inf_points": 0,
+      "mean": 0.02898974870296402,
+      "std": 1.0078458016842855
+    },
+    "var_95_20": {
+      "factor_name": "var_95_20",
+      "success": true,
+      "valid_points": 222,
+      "nan_points": 20,
+      "inf_points": 0,
+      "mean": -0.012092596866253276,
+      "std": 0.004965066023108044
+    }
+  },
+  "ic_analysis": {
+    "distance_to_high_20": {
+      "success": true,
+      "ic_mean": -0.053106663083723776,
+      "ir": -0.07167689074842372
+    },
+    "distance_to_low_20": {
+      "success": true,
+      "ic_mean": 0.06932596974331107,
+      "ir": 0.09098200739017866
+    },
+    "percentile_20": {
+      "success": true,
+      "ic_mean": 0.10899102618080497,
+      "ir": 0.14503420754521473
+    },
+    "percentile_60": {
+      "success": true,
+      "ic_mean": 0.07026236909435309,
+      "ir": 0.09748115048289274
+    },
+    "price_range_ratio_20": {
+      "success": true,
+      "ic_mean": 0.06999759180346678,
+      "ir": 0.09186125022830435
+    },
+    "close_open_ratio": {
+      "success": true,
+      "ic_mean": 0.005994903327474214,
+      "ir": 0.007992699558502908
+    },
+    "high_low_ratio": {
+      "success": true,
+      "ic_mean": -0.04361099598752098,
+      "ir": -0.058412420505648634
+    },
+    "log_return_1": {
+      "success": true,
+      "ic_mean": 0.04084993206426601,
+      "ir": 0.05446478453198324
+    },
+    "log_return_5": {
+      "success": true,
+      "ic_mean": 0.07503381771016603,
+      "ir": 0.09790852309383087
+    },
+    "price_vs_sma20": {
+      "success": true,
+      "ic_mean": 0.1569718991943232,
+      "ir": 0.20870742388738478
+    },
+    "price_vs_sma60": {
+      "success": true,
+      "ic_mean": 0.04587567726547188,
+      "ir": 0.05748442448537731
+    },
+    "sma20_vs_sma60": {
+      "success": true,
+      "ic_mean": 0.0006633828032033218,
+      "ir": 0.0008462923292415537
+    },
+    "momentum_20": {
+      "success": true,
+      "ic_mean": 0.092152828857328,
+      "ir": 0.12306650701925959
+    },
+    "momentum_60": {
+      "success": true,
+      "ic_mean": -0.026556390045968464,
+      "ir": -0.033454554703069884
+    },
+    "momentum_acceleration": {
+      "success": true,
+      "ic_mean": 0.030759620766274975,
+      "ir": 0.039721945416166984
+    },
+    "price_momentum_strength": {
+      "success": true,
+      "ic_mean": 0.08271473858019257,
+      "ir": 0.10858264968822921
+    },
+    "adx_14": {
+      "success": true,
+      "ic_mean": -0.04446665274198523,
+      "ir": -0.06091045238979671
+    },
+    "cci_20": {
+      "success": true,
+      "ic_mean": 0.11762503787114825,
+      "ir": 0.15756374387201663
+    },
+    "macd_hist": {
+      "success": true,
+      "ic_mean": 0.07213079417892672,
+      "ir": 0.09361656551632917
+    },
+    "macd_line": {
+      "success": true,
+      "ic_mean": 0.016739582165535342,
+      "ir": 0.02193797762049124
+    },
+    "macd_signal": {
+      "success": true,
+      "ic_mean": 0.02138170636321033,
+      "ir": 0.02732766867583453
+    },
+    "roc_10": {
+      "success": true,
+      "ic_mean": 0.09609819634885618,
+      "ir": 0.1275529732498165
+    },
+    "rsi_14": {
+      "success": true,
+      "ic_mean": 0.09255895709298143,
+      "ir": 0.11995042871847816
+    },
+    "deviation_from_ma20": {
+      "success": true,
+      "ic_mean": 0.15697189919432344,
+      "ir": 0.20870742388738506
+    },
+    "deviation_from_ma60": {
+      "success": true,
+      "ic_mean": 0.045541923353717824,
+      "ir": 0.0570368226429748
+    },
+    "reversal_10": {
+      "success": true,
+      "ic_mean": -0.09609819634885626,
+      "ir": -0.1275529732498166
+    },
+    "reversal_5": {
+      "success": true,
+      "ic_mean": -0.07791538698675551,
+      "ir": -0.10143549085677968
+    },
+    "stochastic_d": {
+      "success": true,
+      "ic_mean": 0.08397216415793775,
+      "ir": 0.11318815645922022
+    },
+    "stochastic_k": {
+      "success": true,
+      "ic_mean": 0.06210556548172135,
+      "ir": 0.08151109826838841
+    },
+    "ema12": {
+      "success": true,
+      "ic_mean": 0.06265189720778497,
+      "ir": 0.08110592075807598
+    },
+    "ema26": {
+      "success": true,
+      "ic_mean": 0.07087217185333039,
+      "ir": 0.09004653387540479
+    },
+    "ma10": {
+      "success": true,
+      "ic_mean": 0.07888043787420097,
+      "ir": 0.10211768027557663
+    },
+    "ma120": {
+      "success": true,
+      "ic_mean": 0.0787199021657479,
+      "ir": 0.10566526734584752
+    },
+    "ma20": {
+      "success": true,
+      "ic_mean": 0.05514035664018501,
+      "ir": 0.07063885458381898
+    },
+    "ma5": {
+      "success": true,
+      "ic_mean": 0.09120924354285713,
+      "ir": 0.11900525326229683
+    },
+    "ma60": {
+      "success": true,
+      "ic_mean": 0.059333041726737035,
+      "ir": 0.0732390770435402
+    },
+    "ma_bias_10_60": {
+      "success": true,
+      "ic_mean": 0.021153720107139503,
+      "ir": 0.02708182329966265
+    },
+    "ma_bias_5_20": {
+      "success": true,
+      "ic_mean": 0.084720643110927,
+      "ir": 0.11136698155310135
+    },
+    "ma_multi_align": {
+      "success": true,
+      "ic_mean": 0.07439458167447197,
+      "ir": 0.10191673402086833
+    },
+    "price_change_1": {
+      "success": true,
+      "ic_mean": 0.04182730662002237,
+      "ir": 0.055799402483114366
+    },
+    "price_change_5": {
+      "success": true,
+      "ic_mean": 0.07791538698675586,
+      "ir": 0.10143549085678004
+    },
+    "volatility_change": {
+      "success": true,
+      "ic_mean": -0.009583182504686543,
+      "ir": -0.012979063520083005
+    },
+    "volume_shrink": {
+      "success": true,
+      "ic_mean": 0.07958866694108357,
+      "ir": 0.12171615927413426
+    },
+    "volume_surge": {
+      "success": true,
+      "ic_mean": 0.07236961458227187,
+      "ir": 0.10444839062346734
+    },
+    "obv": {
+      "success": true,
+      "ic_mean": 0.037205584133236616,
+      "ir": 0.048682667212079804
+    },
+    "obv_slope": {
+      "success": true,
+      "ic_mean": 0.03263826585299865,
+      "ir": 0.041306912687621385
+    },
+    "volume_ma_ratio": {
+      "success": true,
+      "ic_mean": -0.09920921215244319,
+      "ir": -0.13302899360018194
+    },
+    "death_cross": {
+      "success": true,
+      "ic_mean": 0.12555758660344285,
+      "ir": 0.18915707830529865
+    },
+    "gap_down": {
+      "success": true,
+      "ic_mean": 0.0713710170862821,
+      "ir": 0.09035130212855028
+    },
+    "gap_up": {
+      "success": true,
+      "ic_mean": 0.06202739996960064,
+      "ir": 0.08141893437268137
+    },
+    "golden_cross": {
+      "success": true,
+      "ic_mean": 0.09208628426525732,
+      "ir": 0.1433709592564955
+    },
+    "new_high_20": {
+      "success": false,
+      "error": "No IC stats returned"
+    },
+    "new_low_20": {
+      "success": false,
+      "error": "No IC stats returned"
+    },
+    "three_falling_candles": {
+      "success": true,
+      "ic_mean": 0.0833655408404241,
+      "ir": 0.11142678972967038
+    },
+    "three_rising_candles": {
+      "success": true,
+      "ic_mean": -0.029747259251669173,
+      "ir": -0.036963860083171804
+    },
+    "Mined_Factor_1": {
+      "success": true,
+      "ic_mean": -0.08200540274793643,
+      "ir": -0.10999898720388451
+    },
+    "atr_14": {
+      "success": true,
+      "ic_mean": -0.08368563944455927,
+      "ir": -0.11214688086740578
+    },
+    "atr_norm": {
+      "success": true,
+      "ic_mean": -0.10409576210218809,
+      "ir": -0.1446587643743135
+    },
+    "bollinger_bandwidth": {
+      "success": true,
+      "ic_mean": -0.06108372454165821,
+      "ir": -0.08079169641555883
+    },
+    "bollinger_position": {
+      "success": true,
+      "ic_mean": 0.1218848729605346,
+      "ir": 0.16296602619512054
+    },
+    "volatility_10": {
+      "success": true,
+      "ic_mean": -0.10280254768680887,
+      "ir": -0.1385434484038956
+    },
+    "is_bullish_candle": {
+      "success": true,
+      "ic_mean": -0.08360036345822644,
+      "ir": -0.10850718288917664
+    },
+    "regime_trend": {
+      "success": true,
+      "ic_mean": -0.022380948461281216,
+      "ir": -0.027576625072236707
+    },
+    "regime_volatility": {
+      "success": true,
+      "ic_mean": -0.09164878746375568,
+      "ir": -0.12656907752718932
+    },
+    "EMA12": {
+      "success": true,
+      "ic_mean": 0.06265189720778497,
+      "ir": 0.08110592075807598
+    },
+    "Mined_close_open_ratio_1": {
+      "success": true,
+      "ic_mean": 0.066122558956325,
+      "ir": 0.08643212018439592
+    },
+    "SMA20": {
+      "success": true,
+      "ic_mean": 0.05514035664018501,
+      "ir": 0.07063885458381898
+    },
+    "test_history_factor": {
+      "success": true,
+      "ic_mean": 0.07715223750309305,
+      "ir": 0.10200165874078036
+    },
+    "test_version_factor": {
+      "success": true,
+      "ic_mean": 0.1569718991943232,
+      "ir": 0.20870742388738478
+    },
+    "force_index": {
+      "success": true,
+      "ic_mean": 0.06415485237020262,
+      "ir": 0.08699530554434928
+    },
+    "force_index_ma": {
+      "success": true,
+      "ic_mean": 0.1231767975949122,
+      "ir": 0.16170327756677924
+    },
+    "money_flow": {
+      "success": true,
+      "ic_mean": -0.03391253249088177,
+      "ir": -0.04377646445363637
+    },
+    "money_flow_ma": {
+      "success": true,
+      "ic_mean": 0.02151792439420527,
+      "ir": 0.027720837834561456
+    },
+    "price_vwma_ratio": {
+      "success": true,
+      "ic_mean": 0.09420749837798145,
+      "ir": 0.12567590972095063
+    },
+    "vwma_20": {
+      "success": true,
+      "ic_mean": 0.056641382002547834,
+      "ir": 0.07094162481769478
+    },
+    "Mined_Factor_1_20260313204808_000001": {
+      "success": true,
+      "ic_mean": -0.07175759119848002,
+      "ir": -0.0945047867577929
+    },
+    "Mined_Factor_1_20260313204814_000001": {
+      "success": true,
+      "ic_mean": -0.07175759119848002,
+      "ir": -0.0945047867577929
+    },
+    "Mined_Factor_1_20260313204819_000001": {
+      "success": true,
+      "ic_mean": -0.07175759119848002,
+      "ir": -0.0945047867577929
+    },
+    "Mined_Factor_2_20260313_000001": {
+      "success": true,
+      "ic_mean": 0.005994903327474214,
+      "ir": 0.007992699558502908
+    },
+    "Mined_Factor_3_20260313_000001": {
+      "success": true,
+      "ic_mean": -0.054104055178914714,
+      "ir": -0.0718437172396603
+    },
+    "downside_risk": {
+      "success": true,
+      "ic_mean": -0.039830458882816985,
+      "ir": -0.05254758137330887
+    },
+    "kurtosis_20": {
+      "success": true,
+      "ic_mean": -0.04701893166890294,
+      "ir": -0.06147217432538452
+    },
+    "max_drawdown_20": {
+      "success": true,
+      "ic_mean": 0.06337127182271092,
+      "ir": 0.08400794635988283
+    },
+    "skewness_20": {
+      "success": true,
+      "ic_mean": 0.1058058121508755,
+      "ir": 0.14526436443735827
+    },
+    "var_95_20": {
+      "success": true,
+      "ic_mean": 0.016777533193225933,
+      "ir": 0.02244184776820763
+    }
+  },
+  "summary": {
+    "total_factors": 102,
+    "calculation_success": 85,
+    "calculation_failed": 17,
+    "ic_success": 83,
+    "ic_failed": 2,
+    "issues": [
+      {
+        "factor": "percentile_20",
+        "issues": [
+          "缺失值过多 (19 个)"
+        ]
+      },
+      {
+        "factor": "percentile_60",
+        "issues": [
+          "缺失值过多 (59 个)"
+        ]
+      },
+      {
+        "factor": "log_return_5",
+        "issues": [
+          "缺失值过多 (5 个)"
+        ]
+      },
+      {
+        "factor": "price_vs_sma20",
+        "issues": [
+          "缺失值过多 (19 个)"
+        ]
+      },
+      {
+        "factor": "price_vs_sma60",
+        "issues": [
+          "缺失值过多 (59 个)"
+        ]
+      },
+      {
+        "factor": "sma20_vs_sma60",
+        "issues": [
+          "缺失值过多 (59 个)"
+        ]
+      },
+      {
+        "factor": "momentum_20",
+        "issues": [
+          "缺失值过多 (20 个)"
+        ]
+      },
+      {
+        "factor": "momentum_60",
+        "issues": [
+          "缺失值过多 (60 个)"
+        ]
+      },
+      {
+        "factor": "momentum_acceleration",
+        "issues": [
+          "缺失值过多 (20 个)"
+        ]
+      },
+      {
+        "factor": "price_momentum_strength",
+        "issues": [
+          "缺失值过多 (19 个)"
+        ]
+      },
+      {
+        "factor": "adx_14",
+        "issues": [
+          "缺失值过多 (27 个)"
+        ]
+      },
+      {
+        "factor": "cci_20",
+        "issues": [
+          "缺失值过多 (19 个)"
+        ]
+      },
+      {
+        "factor": "macd_hist",
+        "issues": [
+          "缺失值过多 (33 个)"
+        ]
+      },
+      {
+        "factor": "macd_line",
+        "issues": [
+          "缺失值过多 (33 个)"
+        ]
+      },
+      {
+        "factor": "macd_signal",
+        "issues": [
+          "缺失值过多 (33 个)"
+        ]
+      },
+      {
+        "factor": "roc_10",
+        "issues": [
+          "缺失值过多 (10 个)"
+        ]
+      },
+      {
+        "factor": "rsi_14",
+        "issues": [
+          "缺失值过多 (14 个)"
+        ]
+      },
+      {
+        "factor": "deviation_from_ma20",
+        "issues": [
+          "缺失值过多 (19 个)"
+        ]
+      },
+      {
+        "factor": "deviation_from_ma60",
+        "issues": [
+          "缺失值过多 (59 个)"
+        ]
+      },
+      {
+        "factor": "reversal_10",
+        "issues": [
+          "缺失值过多 (10 个)"
+        ]
+      },
+      {
+        "factor": "reversal_5",
+        "issues": [
+          "缺失值过多 (5 个)"
+        ]
+      },
+      {
+        "factor": "ema12",
+        "issues": [
+          "缺失值过多 (11 个)"
+        ]
+      },
+      {
+        "factor": "ema26",
+        "issues": [
+          "缺失值过多 (25 个)"
+        ]
+      },
+      {
+        "factor": "ma10",
+        "issues": [
+          "缺失值过多 (9 个)"
+        ]
+      },
+      {
+        "factor": "ma120",
+        "issues": [
+          "缺失值过多 (119 个)"
+        ]
+      },
+      {
+        "factor": "ma20",
+        "issues": [
+          "缺失值过多 (19 个)"
+        ]
+      },
+      {
+        "factor": "ma5",
+        "issues": [
+          "缺失值过多 (4 个)"
+        ]
+      },
+      {
+        "factor": "ma60",
+        "issues": [
+          "缺失值过多 (59 个)"
+        ]
+      },
+      {
+        "factor": "ma_bias_10_60",
+        "issues": [
+          "缺失值过多 (59 个)"
+        ]
+      },
+      {
+        "factor": "ma_bias_5_20",
+        "issues": [
+          "缺失值过多 (19 个)"
+        ]
+      },
+      {
+        "factor": "price_change_5",
+        "issues": [
+          "缺失值过多 (5 个)"
+        ]
+      },
+      {
+        "factor": "volatility_change",
+        "issues": [
+          "缺失值过多 (15 个)"
+        ]
+      },
+      {
+        "factor": "obv_slope",
+        "issues": [
+          "缺失值过多 (5 个)"
+        ]
+      },
+      {
+        "factor": "volume_ma_ratio",
+        "issues": [
+          "缺失值过多 (9 个)"
+        ]
+      },
+      {
+        "factor": "new_high_20",
+        "issues": [
+          "标准差为0（因子值恒定）"
+        ]
+      },
+      {
+        "factor": "new_low_20",
+        "issues": [
+          "标准差为0（因子值恒定）"
+        ]
+      },
+      {
+        "factor": "Mined_Factor_1",
+        "issues": [
+          "缺失值过多 (14 个)"
+        ]
+      },
+      {
+        "factor": "atr_14",
+        "issues": [
+          "缺失值过多 (14 个)"
+        ]
+      },
+      {
+        "factor": "atr_norm",
+        "issues": [
+          "缺失值过多 (14 个)"
+        ]
+      },
+      {
+        "factor": "bollinger_bandwidth",
+        "issues": [
+          "缺失值过多 (19 个)"
+        ]
+      },
+      {
+        "factor": "bollinger_position",
+        "issues": [
+          "缺失值过多 (19 个)"
+        ]
+      },
+      {
+        "factor": "volatility_10",
+        "issues": [
+          "缺失值过多 (10 个)"
+        ]
+      },
+      {
+        "factor": "EMA12",
+        "issues": [
+          "缺失值过多 (11 个)"
+        ]
+      },
+      {
+        "factor": "SMA20",
+        "issues": [
+          "缺失值过多 (19 个)"
+        ]
+      },
+      {
+        "factor": "test_version_factor",
+        "issues": [
+          "缺失值过多 (19 个)"
+        ]
+      },
+      {
+        "factor": "force_index_ma",
+        "issues": [
+          "缺失值过多 (13 个)"
+        ]
+      },
+      {
+        "factor": "money_flow_ma",
+        "issues": [
+          "缺失值过多 (4 个)"
+        ]
+      },
+      {
+        "factor": "Mined_Factor_1_20260313204808_000001",
+        "issues": [
+          "存在无穷大值 (1 个)"
+        ]
+      },
+      {
+        "factor": "Mined_Factor_1_20260313204814_000001",
+        "issues": [
+          "存在无穷大值 (1 个)"
+        ]
+      },
+      {
+        "factor": "Mined_Factor_1_20260313204819_000001",
+        "issues": [
+          "存在无穷大值 (1 个)"
+        ]
+      },
+      {
+        "factor": "downside_risk",
+        "issues": [
+          "缺失值过多 (20 个)"
+        ]
+      },
+      {
+        "factor": "kurtosis_20",
+        "issues": [
+          "缺失值过多 (20 个)"
+        ]
+      },
+      {
+        "factor": "max_drawdown_20",
+        "issues": [
+          "缺失值过多 (19 个)"
+        ]
+      },
+      {
+        "factor": "skewness_20",
+        "issues": [
+          "缺失值过多 (20 个)"
+        ]
+      },
+      {
+        "factor": "var_95_20",
+        "issues": [
+          "缺失值过多 (20 个)"
+        ]
+      }
+    ]
+  }
+}
