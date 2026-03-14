@@ -28,11 +28,15 @@ A full-stack quantitative investment research system integrating factor manageme
 
 ## Core Features
 
+![1773500695533](image/README_ZH/1773500695533.png)
+
 ### 1. Factor Management
 - ✅ **Custom Factor Definition** - Supports Tongda Xinhua (MyLanguage) syntax and TALib functions
 - ✅ **Formula Validation** - Real-time syntax checking and logical verification
 - ✅ **Version Control** - Factor modification history and version rollback
 - ✅ **Pre-built Factor Library** - Built-in common technical factors (MA, RSI, MACD, Bollinger Bands, etc.)
+
+![1773500664940](image/README_ZH/1773500664940.png)
 
 ### 2. Factor Analysis
 - ✅ **IC/IR Analysis** - Information Coefficient and Information Ratio calculation (supports 1-day, 5-day, 10-day prediction cycles)
@@ -41,11 +45,15 @@ A full-stack quantitative investment research system integrating factor manageme
 - ✅ **Factor Attribution Analysis** - Decompose factor contribution to returns
 - ✅ **Dynamic Monitoring** - Factor performance tracking across time series dimensions
 
+![1773500638704](image/README_ZH/1773500638704.png)
+
 ### 3. Factor Mining
 - ✅ **Genetic Algorithm Mining** - DEAP-based evolutionary algorithm for automatic factor search
 - ✅ **Multi-objective Optimization** - Simultaneously optimize IC, IR, monotonicity, and other objectives
 - ✅ **Factor Generation** - Supports basic operators, function calls, and time window operations
 - ✅ **Parallel Computing** - Parallel population evaluation for acceleration
+
+![1773500591756](image/README_ZH/1773500591756.png)
 
 ### 4. Portfolio Analysis
 - ✅ **Multi-factor Portfolio** - Supports equal weight, market cap weighting, IC_IR maximization, etc.
@@ -53,12 +61,16 @@ A full-stack quantitative investment research system integrating factor manageme
 - ✅ **Optimization Configuration** - Factor weight optimization based on historical performance
 - ✅ **Portfolio Performance** - Annual return, Sharpe ratio, maximum drawdown, and other metrics
 
+![1773500498447](image/README_ZH/1773500498447.png)
+
 ### 5. Strategy Backtesting
 - ✅ **Single Factor Backtesting** - Factor quantile-based stock selection backtesting
 - ✅ **Multi-factor Strategies** - Composite factor signal generation
 - ✅ **Strategy Comparison** - Multi-strategy parallel backtesting and comparison analysis
 - ✅ **Performance Metrics** - Complete metric system including returns, risk, and turnover
 - ✅ **Visualization Charts** - Equity curves, drawdowns, factor performance charts, etc.
+
+![1773500440529](image/README_ZH/1773500440529.png)
 
 ---
 
