@@ -19,6 +19,9 @@ wheels/
 *.egg-info/
 .installed.cfg
 *.egg
+.ipynb_checkpoints
+*.ipynb
+*.whl
 
 # Virtual environments
 .venv/

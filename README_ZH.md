@@ -446,13 +446,24 @@ sequenceDiagram
 - **pnpm** (包管理器)
 - **TA-Lib** (技术分析库)
 
-### 安装 pnpm
+### 下载安装 Node.js
+访问[下载 Node.js®](https://nodejs.org/zh-cn/download/)选择合适版本（如v20.20.2）的nodejs下载并安装。
 
+
+### 安装 pnpm
+参考：https://pnpm.io/installation
+- windows
+```bash
+# use powershell
+Invoke-WebRequest https://get.pnpm.io/install.ps1 -UseBasicParsing | Invoke-Expression
+```
+
+- linux/max
 ```bash
 npm install -g pnpm
 ```
 
-或访问：https://pnpm.io/installation
+
 
 ### 安装 TA-Lib
 
@@ -460,6 +471,7 @@ npm install -g pnpm
 
 ```bash
 # 下载预编译的wheel包安装
+# 下载地址：https://sourceforge.net/projects/talib-whl/files/ta_lib_0.4.28/
 pip install TA_Lib-0.4.28-cp311-cp311-win_amd64.whl
 ```
 

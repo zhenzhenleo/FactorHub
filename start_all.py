@@ -30,6 +30,22 @@ def check_pnpm_installed():
     except (subprocess.TimeoutExpired, FileNotFoundError):
         return False, None
 
+def check_node_installed():
+    """检查 Node.js 是否已安装"""
+    try:
+        result = subprocess.run(
+            ["node", "--version"],
+            capture_output=True,
+            text=True,
+            timeout=5
+        )
+        if result.returncode == 0:
+            return True, result.stdout.strip()
+        return False, None
+    except (subprocess.TimeoutExpired, FileNotFoundError):
+        return False, None
+
+
 def main():
     print("=" * 60)
     print("启动 FactorFlow 完整服务")
@@ -63,15 +79,19 @@ def main():
         print("首次运行需要安装依赖，正在自动安装...")
         print("这可能需要几分钟，请耐心等待...")
         try:
+            install_cmd = [get_pnpm_cmd(), "install"]
             install_result = subprocess.run(
-                ["pnpm", "install"],
+                install_cmd,
                 cwd=str(frontend_dir),
-                check=True
+                capture_output=True,
+                text=True
             )
             if install_result.returncode == 0:
                 print("✓ 依赖安装完成")
             else:
                 print("❌ 依赖安装失败")
+                print(install_result.stdout)
+                print(install_result.stderr)
                 return
         except Exception as e:
             print(f"❌ 依赖安装出错: {e}")
@@ -101,7 +121,9 @@ def main():
             cwd=str(project_root),
             stdout=subprocess.PIPE,
             stderr=subprocess.STDOUT,
-            universal_newlines=True,
+            text=True,
+            encoding="utf-8",
+            errors="replace",
             bufsize=1
         )
         processes.append(("Backend API", api_process))
@@ -127,7 +149,9 @@ def main():
             cwd=str(frontend_dir),
             stdout=subprocess.PIPE,
             stderr=subprocess.STDOUT,
-            universal_newlines=True,
+            text=True,
+            encoding="utf-8",
+            errors="replace",
             bufsize=1
         )
         processes.append(("Frontend Dev Server", frontend_process))
@@ -140,6 +164,11 @@ def main():
         if frontend_process.poll() is not None:
             print("❌ 前端服务启动失败")
             print("请检查 frontend/react-antd 目录")
+            if frontend_process.stdout is not None:
+                output = frontend_process.stdout.read()
+                if output:
+                    print("\n--- 前端启动日志 ---")
+                    print(output)
             api_process.terminate()
             return
 
