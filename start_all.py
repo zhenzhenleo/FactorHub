@@ -61,6 +61,17 @@ def main():
         print("请确保 frontend/react-antd 目录存在")
         return
 
+    # 检查 Node.js 是否安装
+    print("\n检查环境...")
+    node_installed, node_version = check_node_installed()
+    if not node_installed:
+        print("❌ 错误: Node.js 未安装，或 node 命令未在 PATH 中")
+        print("请先安装 Node.js: https://nodejs.org/zh-cn/download/")
+        print("安装后请确保可以在终端运行 node --version")
+        return
+
+    print(f"✓ Node.js 版本: {node_version}")
+
     # 检查pnpm是否安装
     print("\n检查环境...")
     pnpm_installed, pnpm_version = check_pnpm_installed()
